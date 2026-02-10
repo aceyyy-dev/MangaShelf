@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>MangaShelf</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#1978e5",
+              "background-light": "#f6f7f8",
+              "background-dark": "#111821",
+              "surface-dark": "#1e293b",
+              "surface-darker": "#151b26",
+              "chart-teal": "#2dd4bf",
+              "chart-coral": "#fb923c",
+              gold: "#FFD700",
+              cream: "#F5E6CA",
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+            },
+            backgroundImage: {
+              "manga-texture": "url('https://images.unsplash.com/photo-1614726365723-49cfa356c496?q=80&w=2574&auto=format&fit=crop')",
+            }
+          },
+        },
+      };
+    </script>
+    <style>
+      html, body, #root {
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        /* Mobile-app like scrolling behavior */
+        overscroll-behavior-y: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      /* Hide Scrollbar */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .glass-panel {
+        background: rgba(16, 22, 34, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      /* Safe area for iPhone notch/home bar */
+      .safe-pb {
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+      .safe-pt {
+        padding-top: env(safe-area-inset-top);
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react": "https://esm.sh/react@^19.2.4",
+    "recharts": "https://esm.sh/recharts@^3.7.0",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.13.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.40.0"
+  }
+}
+</script>
+</head>
+  <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display antialiased selection:bg-primary selection:text-white">
+    <div id="root"></div>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "name": "MangaShelf",
+  "description": "The ultimate manga collection tracker. Scan, organize, and track your library with advanced insights.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

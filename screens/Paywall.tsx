@@ -1,0 +1,116 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import Icon from '../components/Icon';
+
+const Paywall: React.FC = () => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display antialiased h-full w-full overflow-hidden flex flex-col relative selection:bg-primary selection:text-white">
+        <div className="absolute inset-0 z-0 opacity-[0.07]" style={{ backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+        
+        <div className="absolute top-0 inset-x-0 h-[40vh] z-0 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/20 via-background-dark/80 to-background-dark z-10"></div>
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJrL-6h9fUbYi2bk1CLAqZz7f530lcZhV8A-JXPLtFECxyOFcY8j6VCmc7v2-HREVBLWDyaci1YhetKvqyi-s4TjzqU0olJHUf6QnaehonQX6Zdd8mkYorApnMAf-EjIyAW74b7n3VLexa9tY7hF9jcbgfnqHNHVZWabBYPuKXIdogdOx2qKiNG1kQSkWsXyLL8M5LZ1zDwgYcK6hDki4nON-ftLS6crvCPUKfa66SNYF_ZPt3oPqIJAd_fTS9FoPD-2LFWDMfj_0" alt="bg" className="w-full h-full object-cover opacity-40 mix-blend-overlay" />
+        </div>
+
+        <main className="relative z-10 flex flex-col h-full px-6 pt-12 pb-6">
+            <button onClick={() => navigate(-1)} className="absolute top-12 left-6 p-2 rounded-full bg-black/20 text-white z-20">
+                <Icon name="close" type="round" />
+            </button>
+
+            <div className="flex-none mb-8 text-center mt-8">
+                <div className="inline-flex items-center justify-center p-4 mb-4 rounded-2xl bg-gradient-to-tr from-gold/20 to-gold/5 ring-1 ring-gold/30 shadow-2xl shadow-gold/10">
+                    <Icon name="star" type="filled" className="text-4xl text-gold" />
+                </div>
+                <h1 className="text-4xl font-black tracking-tight mb-2 text-white">
+                    MangaShelf<span className="text-gold">+</span>
+                </h1>
+                <p className="text-slate-400 text-sm font-medium">Unlock the ultimate collector's experience.</p>
+            </div>
+
+            <div className="flex-1 overflow-y-auto no-scrollbar min-h-0 mb-6">
+                <div className="space-y-4">
+                     {[
+                        { icon: 'bar_chart', title: 'Advanced Insights', desc: 'Detailed stats and breakdowns.' },
+                        { icon: 'all_inclusive', title: 'Unlimited Collection', desc: 'Track thousands without limits.' },
+                        { icon: 'cloud_upload', title: 'Secure Cloud Backup', desc: 'Never lose your progress.' },
+                        { icon: 'palette', title: 'Custom Themes', desc: 'Exclusive skins and icons.' },
+                     ].map((item, i) => (
+                        <div key={i} className="flex items-center p-3 rounded-xl bg-white/5 border border-white/5 backdrop-blur-sm hover:bg-white/10 transition-colors">
+                            <div className="flex-none w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center mr-4">
+                                <Icon name={item.icon} className="text-gold text-xl" />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-white text-sm">{item.title}</h3>
+                                <p className="text-xs text-slate-400">{item.desc}</p>
+                            </div>
+                        </div>
+                     ))}
+                </div>
+            </div>
+
+            <div className="flex-none space-y-3 mb-6">
+                <label className="relative group cursor-pointer block">
+                    <input type="radio" name="plan" className="peer sr-only" defaultChecked />
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-gold/50 to-primary/50 rounded-xl opacity-75 blur transition duration-200 group-hover:opacity-100 peer-checked:opacity-100 animate-pulse"></div>
+                    <div className="relative flex items-center justify-between p-4 rounded-xl bg-background-dark border-2 border-transparent peer-checked:border-gold/50 transition-all shadow-xl">
+                        <div className="flex items-center gap-3">
+                            <div className="w-5 h-5 rounded-full border-2 border-slate-600 peer-checked:border-gold peer-checked:bg-gold flex items-center justify-center transition-colors">
+                                <div className="w-2.5 h-2.5 bg-background-dark rounded-full opacity-0 peer-checked:opacity-100"></div>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="font-bold text-white">Yearly Access</span>
+                                <span className="text-xs text-gold font-medium">Best Value • Save ~33%</span>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <span className="block text-xl font-bold text-white">$39.99</span>
+                            <span className="text-xs text-slate-400">/year</span>
+                        </div>
+                        <div className="absolute -top-3 right-4 bg-gold text-black text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg transform translate-y-1">BEST OFFER</div>
+                    </div>
+                </label>
+                
+                <label className="group cursor-pointer block">
+                    <input type="radio" name="plan" className="peer sr-only" />
+                    <div className="relative flex items-center justify-between p-4 rounded-xl bg-white/5 border-2 border-transparent hover:bg-white/10 peer-checked:bg-background-dark peer-checked:border-primary/50 transition-all">
+                        <div className="flex items-center gap-3">
+                            <div className="w-5 h-5 rounded-full border-2 border-slate-600 peer-checked:border-primary peer-checked:bg-primary flex items-center justify-center transition-colors">
+                                <div className="w-2.5 h-2.5 bg-white rounded-full opacity-0 peer-checked:opacity-100"></div>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="font-bold text-slate-200 peer-checked:text-white">Monthly Access</span>
+                                <span className="text-xs text-slate-500 peer-checked:text-primary/80">Flexible billing</span>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <span className="block text-xl font-bold text-slate-200 peer-checked:text-white">$4.99</span>
+                            <span className="text-xs text-slate-500">/month</span>
+                        </div>
+                    </div>
+                </label>
+            </div>
+
+            <div className="flex-none space-y-4">
+                <button className="w-full py-4 px-6 bg-primary hover:bg-primary/90 active:bg-primary/80 text-white font-bold text-lg rounded-xl shadow-lg shadow-primary/25 transition-all transform active:scale-[0.98] flex items-center justify-center gap-2 group">
+                    Start MangaShelf+
+                    <Icon name="arrow_forward" className="text-xl group-hover:translate-x-1 transition-transform" />
+                </button>
+                <div className="text-center space-y-3">
+                    <button onClick={() => navigate('/home')} className="text-slate-400 hover:text-white text-sm font-medium transition-colors">
+                        Continue with Limited Version
+                    </button>
+                    <div className="flex justify-center items-center gap-4 text-[10px] text-slate-600 uppercase tracking-wider font-semibold">
+                        <button className="hover:text-slate-400">Restore Purchase</button>
+                        <span className="w-1 h-1 rounded-full bg-slate-700"></span>
+                        <button className="hover:text-slate-400">Terms & Privacy</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+  );
+};
+
+export default Paywall;
