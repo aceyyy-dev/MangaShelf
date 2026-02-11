@@ -105,8 +105,8 @@ const TopAuthors: React.FC = () => {
   const topAuthorName = stats.sortedAuthors.length > 0 ? stats.sortedAuthors[0].name : "None";
 
   return (
-    <div className="h-full overflow-y-auto overflow-x-hidden bg-background-light dark:bg-background-dark text-slate-900 dark:text-white pb-32">
-        <header className="sticky top-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 pt-12 pb-4">
+    <div className="h-full overflow-y-auto overflow-x-hidden bg-background-light dark:bg-background-dark text-slate-900 dark:text-white pb-24">
+        <header className="sticky top-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 pt-safe-pt pb-4">
             <div className="flex items-center gap-4">
                 <button 
                     onClick={() => navigate(-1)}

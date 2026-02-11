@@ -65,9 +65,9 @@ const SeriesCompletion: React.FC = () => {
   }, [series]);
 
   return (
-    <div className="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200 antialiased selection:bg-primary selection:text-white h-full overflow-y-auto">
-        <div className="mx-auto max-w-3xl w-full min-h-screen relative flex flex-col pb-24">
-            <header className="sticky top-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-6 pt-12 pb-4">
+    <div className="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200 antialiased selection:bg-primary selection:text-white h-full overflow-y-auto overflow-x-hidden">
+        <div className="mx-auto max-w-3xl w-full min-h-full relative flex flex-col pb-24">
+            <header className="sticky top-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-6 pt-safe-pt pb-4">
                 <div className="flex items-center gap-4">
                     <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-slate-200 dark:hover:bg-surface-dark transition-colors text-slate-500 dark:text-slate-400">
                         <Icon name="arrow_back" />

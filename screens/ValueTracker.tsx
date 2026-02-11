@@ -124,7 +124,7 @@ const ValueTracker: React.FC = () => {
 
   return (
     <div className="h-full overflow-y-auto overflow-x-hidden bg-background-light dark:bg-background-dark pb-24">
-      <header className="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 pt-12 pb-4">
+      <header className="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 pt-safe-pt pb-4">
         <div className="flex items-center gap-4">
           <button 
             onClick={() => navigate(-1)}
