@@ -2,14 +2,16 @@
 <html lang="en" class="dark">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>MangaShelf</title>
-    
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-    
+
     <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
@@ -45,13 +47,23 @@
       };
     </script>
     <style>
-      html, body {
+      *, *::before, *::after { box-sizing: border-box; }
+
+      html {
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+      }
+      body {
         height: 100%;
         width: 100%;
         margin: 0;
         padding: 0;
         overflow: hidden;
-        position: fixed;
+        overscroll-behavior-y: none;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
       #root {
         height: 100%;
@@ -59,43 +71,37 @@
         overflow: hidden;
         position: relative;
       }
-      body {
-        overscroll-behavior-y: none;
-        -webkit-tap-highlight-color: transparent;
-      }
-      /* Hide Scrollbar */
-      .no-scrollbar::-webkit-scrollbar {
-        display: none;
-      }
-      .no-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-      }
+
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
       .glass-panel {
         background: rgba(16, 22, 34, 0.85);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border-top: 1px solid rgba(255, 255, 255, 0.05);
       }
-      /* Safe area for iPhone notch/home bar */
-      .safe-pb {
-        padding-bottom: env(safe-area-inset-bottom);
-      }
-      .safe-pt {
-        padding-top: env(safe-area-inset-top);
-      }
 
-      /* Animations */
+      .pt-safe-pt { padding-top: max(env(safe-area-inset-top, 0px), 12px); }
+      .pb-safe-pb { padding-bottom: max(env(safe-area-inset-bottom, 0px), 12px); }
+      .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+      .mt-safe-pt { margin-top: env(safe-area-inset-top, 0px); }
+      .safe-pb { padding-bottom: env(safe-area-inset-bottom, 0px); }
+      .safe-pt { padding-top: env(safe-area-inset-top, 0px); }
+
       @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes fadeInDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
       @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-      @keyframes flowEnter { 
-        from { transform: translateX(30px); opacity: 0; } 
-        to { transform: translateX(0); opacity: 1; } 
-      }
-      
+      @keyframes scaleIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+      @keyframes flowEnter { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+      @keyframes float { 0%, 100% { transform: translateY(0) rotate(12deg); } 50% { transform: translateY(-8px) rotate(12deg); } }
+
       .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+      .animate-fade-in-down { animation: fadeInDown 0.6s ease-out forwards; }
       .animate-slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+      .animate-scale-in { animation: scaleIn 0.3s ease-out forwards; }
       .animate-flow-enter { animation: flowEnter 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+      .animate-float { animation: float 3s ease-in-out infinite; }
     </style>
   <script type="importmap">
 {
@@ -112,5 +118,6 @@
 </head>
   <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display antialiased selection:bg-primary selection:text-white">
     <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>

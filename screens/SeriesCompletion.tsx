@@ -66,7 +66,7 @@ const SeriesCompletion: React.FC = () => {
 
   return (
     <div className="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200 antialiased selection:bg-primary selection:text-white h-full overflow-y-auto">
-        <div className="mx-auto max-w-md min-h-screen relative flex flex-col pb-24">
+        <div className="mx-auto max-w-3xl w-full min-h-screen relative flex flex-col pb-24">
             <header className="sticky top-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-6 pt-12 pb-4">
                 <div className="flex items-center gap-4">
                     <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-slate-200 dark:hover:bg-surface-dark transition-colors text-slate-500 dark:text-slate-400">
@@ -214,7 +214,7 @@ const SeriesCompletion: React.FC = () => {
 
                 {/* Smart Insights (Only show if we have nearly complete series) */}
                 {nearlyCompleteSeries.length > 0 && (
-                    <div className="bg-gradient-to-br from-indigo-900 to-slate-900 rounded-2xl p-5 shadow-lg border border-slate-700/50 relative overflow-hidden mt-6">
+                    <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-5 shadow-lg border border-slate-700/50 relative overflow-hidden mt-6">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
                         <div className="absolute bottom-0 left-0 w-24 h-24 bg-chart-teal/10 rounded-full blur-2xl -ml-10 -mb-10"></div>
                         <div className="relative z-10">

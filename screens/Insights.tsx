@@ -378,7 +378,7 @@ const Insights: React.FC = () => {
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                         <h2 className="text-lg font-bold text-slate-900 dark:text-white">Sensei</h2>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-gradient-to-r from-blue-500 to-indigo-500 text-white uppercase tracking-wider">Beta</span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-gradient-to-r from-blue-500 to-cyan-500 text-white uppercase tracking-wider">Beta</span>
                     </div>
                     {aiResponse ? (
                         <p className="text-sm text-slate-800 dark:text-slate-200 leading-relaxed mb-4 bg-white/50 dark:bg-black/20 p-3 rounded-lg border border-primary/10 animate-fade-in">{aiResponse}</p>

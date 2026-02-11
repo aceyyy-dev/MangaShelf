@@ -265,7 +265,7 @@ const Profile: React.FC = () => {
             <div className="p-6 space-y-8">
                  <div className="flex flex-col items-center">
                     <div className="relative group cursor-pointer" onClick={() => avatarInputRef.current?.click()}>
-                        <div className="w-28 h-28 rounded-full p-1 bg-gradient-to-tr from-primary via-blue-500 to-indigo-400">
+                        <div className="w-28 h-28 rounded-full p-1 bg-gradient-to-tr from-primary via-blue-500 to-cyan-400">
                              <Avatar src={editForm.avatarUrl} size="2xl" className="border-4 border-background-light dark:border-background-dark group-hover:opacity-80 transition-opacity" />
                         </div>
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -367,7 +367,7 @@ const Profile: React.FC = () => {
                      { id: 'releases', label: 'New Release Alerts', icon: 'new_releases', color: 'text-orange-500', desc: 'Get notified when new volumes drop.' },
                      { id: 'prices', label: 'Price Drops', icon: 'sell', color: 'text-green-500', desc: 'Alerts for wishlisted items.' },
                      { id: 'reminders', label: 'Daily Reminder', icon: 'schedule', color: 'text-blue-500', desc: 'Keep your reading streak alive.' },
-                     { id: 'weekly', label: 'Weekly Insights', icon: 'insights', color: 'text-purple-500', desc: 'Summary of your collection growth.' },
+                     { id: 'weekly', label: 'Weekly Insights', icon: 'insights', color: 'text-blue-500', desc: 'Summary of your collection growth.' },
                      { id: 'updates', label: 'App Updates', icon: 'system_update', color: 'text-slate-500', desc: 'New features and improvements.' },
                  ].map(item => (
                      <div key={item.id} className="flex items-center justify-between p-4 bg-white dark:bg-surface-dark rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
@@ -424,7 +424,7 @@ const Profile: React.FC = () => {
                         </button>
                          <button onClick={handleRestoreClick} className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-500/10 flex items-center justify-center text-purple-600 dark:text-purple-400"><Icon name="restore" className="text-lg" /></div>
+                                <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400"><Icon name="restore" className="text-lg" /></div>
                                 <div className="text-left"><span className="block text-sm font-bold text-slate-700 dark:text-slate-200">Restore from File</span></div>
                             </div>
                             <Icon name="chevron_right" className="text-slate-400 group-hover:text-primary transition-colors" />
@@ -472,10 +472,10 @@ const Profile: React.FC = () => {
       )}
 
       <div className="h-14 w-full"></div>
-      <main className="max-w-md mx-auto px-5 space-y-8">
+      <main className="max-w-3xl mx-auto px-5 md:px-8 space-y-8">
         <header className="flex flex-col items-center text-center space-y-4 pt-4">
             <div className="relative group cursor-pointer" onClick={handleEditProfileClick}>
-                <div className="relative w-28 h-28 rounded-full p-1 bg-gradient-to-tr from-primary via-blue-500 to-indigo-400">
+                <div className="relative w-28 h-28 rounded-full p-1 bg-gradient-to-tr from-primary via-blue-500 to-cyan-400">
                     <Avatar src={userProfile.avatarUrl} size="2xl" className="border-4 border-background-light dark:border-background-dark" />
                 </div>
             </div>
@@ -516,7 +516,7 @@ const Profile: React.FC = () => {
                 <div className="bg-white dark:bg-surface-dark rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm">
                      {[
                         { icon: 'favorite_border', color: 'pink', label: 'Favorites', badge: favoriteCount > 0 ? `${favoriteCount} vols` : null, action: () => setActiveView('favorites') },
-                        { icon: 'shopping_cart', color: 'purple', label: 'Wishlist', badge: wishlistCount > 0 ? `${wishlistCount} items` : null, action: () => setActiveView('wishlist') },
+                        { icon: 'shopping_cart', color: 'sky', label: 'Wishlist', badge: wishlistCount > 0 ? `${wishlistCount} items` : null, action: () => setActiveView('wishlist') },
                         { icon: 'table_view', color: 'emerald', label: 'Export Data (CSV)', badge: null, actionIcon: 'chevron_right', action: () => setActiveView('export') }
                      ].map((item, i) => (
                         <button key={i} onClick={item.action} className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group border-b border-slate-100 dark:border-slate-800 last:border-0">
@@ -532,7 +532,7 @@ const Profile: React.FC = () => {
                      {[
                         { icon: 'dark_mode', color: 'blue', label: 'Appearance', badge: 'Dark System', action: () => {} },
                         { icon: 'notifications_none', color: 'orange', label: 'Notifications', badge: null, action: () => setActiveView('notifications') },
-                        { icon: 'cloud_queue', color: 'indigo', label: 'Backup & Restore', sub: `Last synced: ${lastSynced}`, action: () => setActiveView('backup') }
+                        { icon: 'cloud_queue', color: 'teal', label: 'Backup & Restore', sub: `Last synced: ${lastSynced}`, action: () => setActiveView('backup') }
                      ].map((item, i) => (
                         <button key={i} onClick={item.action} className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group border-b border-slate-100 dark:border-slate-800 last:border-0">
                             <div className="flex items-center gap-4"><div className={`w-9 h-9 rounded-lg bg-${item.color}-100 dark:bg-${item.color}-500/10 flex items-center justify-center text-${item.color}-600 dark:text-${item.color}-400`}><Icon name={item.icon} type="outlined" className="text-xl" /></div><div className="flex flex-col items-start"><span className="text-sm font-medium text-slate-700 dark:text-slate-200">{item.label}</span>{item.sub && <span className="text-[10px] text-slate-500 dark:text-slate-400">{item.sub}</span>}</div></div>

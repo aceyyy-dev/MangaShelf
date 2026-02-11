@@ -214,7 +214,7 @@ const SeriesDetails: React.FC = () => {
     )}
 
     <div className="h-full overflow-y-auto overflow-x-hidden bg-background-light dark:bg-background-dark pb-0">
-        <nav className="fixed top-0 w-full max-w-md z-50 transition-all duration-300">
+        <nav className="fixed top-0 w-full z-50 transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-transparent pointer-events-none h-24"></div>
             <div className="flex items-center justify-between px-4 h-14 relative z-10 text-white mt-safe-pt">
                 <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors">
