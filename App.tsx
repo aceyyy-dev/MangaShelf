@@ -1,5 +1,5 @@
 import React from 'react';
-import { MemoryRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import BottomNav from './components/BottomNav';
 import Onboarding from './screens/Onboarding';
 import Signup from './screens/Signup';

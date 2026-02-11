@@ -13,20 +13,45 @@ const EmailConfirmation: React.FC = () => {
   useEffect(() => {
     const handleEmailConfirmation = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
 
-        if (error) throw error;
+        if (accessToken && refreshToken) {
+          const { data: { session }, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
 
-        if (session?.user) {
-          const email = session.user.email || '';
-          setTempUserData({ name: email.split('@')[0] });
-          setStatus('success');
+          if (error) throw error;
 
-          setTimeout(() => {
-            navigate('/username-setup');
-          }, 2000);
+          if (session?.user) {
+            const email = session.user.email || '';
+            setTempUserData({ name: email.split('@')[0] });
+            setStatus('success');
+
+            setTimeout(() => {
+              navigate('/username-setup');
+            }, 2000);
+          } else {
+            throw new Error('No session found');
+          }
         } else {
-          throw new Error('No session found');
+          const { data: { session }, error } = await supabase.auth.getSession();
+
+          if (error) throw error;
+
+          if (session?.user) {
+            const email = session.user.email || '';
+            setTempUserData({ name: email.split('@')[0] });
+            setStatus('success');
+
+            setTimeout(() => {
+              navigate('/username-setup');
+            }, 2000);
+          } else {
+            throw new Error('No confirmation token found');
+          }
         }
       } catch (err: any) {
         setStatus('error');
