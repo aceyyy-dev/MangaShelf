@@ -13,101 +13,48 @@ const OAuthCallback: React.FC = () => {
   useEffect(() => {
     const handleOAuthCallback = async () => {
       try {
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const accessToken = hashParams.get('access_token');
-        const refreshToken = hashParams.get('refresh_token');
+        const { data: { session }, error } = await supabase.auth.getSession();
 
-        if (accessToken && refreshToken) {
-          const { data: { session }, error: sessionError } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          });
+        if (error) throw error;
 
-          if (sessionError) throw sessionError;
+        if (session?.user) {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .maybeSingle();
 
-          if (session?.user) {
-            const { data: profile, error: profileError } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', session.user.id)
-              .maybeSingle();
+          if (profileError && profileError.code !== 'PGRST116') {
+            throw profileError;
+          }
 
-            if (profileError && profileError.code !== 'PGRST116') {
-              throw profileError;
-            }
+          if (profile) {
+            login({
+              name: profile.name,
+              username: profile.username,
+              avatarUrl: profile.avatar_url,
+              joinDate: profile.join_date,
+            });
 
-            if (profile) {
-              login({
-                name: profile.name,
-                username: profile.username,
-                avatarUrl: profile.avatar_url,
-                joinDate: profile.join_date,
-              });
-
-              setStatus('success');
-              setTimeout(() => {
-                navigate('/home');
-              }, 1000);
-            } else {
-              const name = session.user.user_metadata?.full_name ||
-                          session.user.user_metadata?.name ||
-                          session.user.email?.split('@')[0] ||
-                          'User';
-
-              setTempUserData({ name });
-              setStatus('success');
-
-              setTimeout(() => {
-                navigate('/username-setup');
-              }, 1000);
-            }
+            setStatus('success');
+            setTimeout(() => {
+              navigate('/home');
+            }, 1000);
           } else {
-            throw new Error('No session found');
+            const name = session.user.user_metadata?.full_name ||
+                        session.user.user_metadata?.name ||
+                        session.user.email?.split('@')[0] ||
+                        'User';
+
+            setTempUserData({ name });
+            setStatus('success');
+
+            setTimeout(() => {
+              navigate('/username-setup');
+            }, 1000);
           }
         } else {
-          const { data: { session }, error } = await supabase.auth.getSession();
-
-          if (error) throw error;
-
-          if (session?.user) {
-            const { data: profile, error: profileError } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', session.user.id)
-              .maybeSingle();
-
-            if (profileError && profileError.code !== 'PGRST116') {
-              throw profileError;
-            }
-
-            if (profile) {
-              login({
-                name: profile.name,
-                username: profile.username,
-                avatarUrl: profile.avatar_url,
-                joinDate: profile.join_date,
-              });
-
-              setStatus('success');
-              setTimeout(() => {
-                navigate('/home');
-              }, 1000);
-            } else {
-              const name = session.user.user_metadata?.full_name ||
-                          session.user.user_metadata?.name ||
-                          session.user.email?.split('@')[0] ||
-                          'User';
-
-              setTempUserData({ name });
-              setStatus('success');
-
-              setTimeout(() => {
-                navigate('/username-setup');
-              }, 1000);
-            }
-          } else {
-            throw new Error('No authentication tokens found');
-          }
+          throw new Error('No authentication session found');
         }
       } catch (err: any) {
         console.error('OAuth callback error:', err);
@@ -116,7 +63,11 @@ const OAuthCallback: React.FC = () => {
       }
     };
 
-    handleOAuthCallback();
+    const timer = setTimeout(() => {
+      handleOAuthCallback();
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [navigate, login, setTempUserData]);
 
   return (
