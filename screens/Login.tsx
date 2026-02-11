@@ -13,6 +13,8 @@ const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
+  const [resendingEmail, setResendingEmail] = useState(false);
 
   useEffect(() => {
       // Trigger animation after mount
@@ -28,6 +30,7 @@ const Login: React.FC = () => {
   const handleFormLogin = async (e: React.FormEvent) => {
       e.preventDefault();
       setError('');
+      setNeedsConfirmation(false);
 
       if (!email || !password) {
           setError('Please fill in all fields');
@@ -42,7 +45,14 @@ const Login: React.FC = () => {
               password,
           });
 
-          if (loginError) throw loginError;
+          if (loginError) {
+              if (loginError.message.toLowerCase().includes('email not confirmed')) {
+                  setNeedsConfirmation(true);
+                  setError('Please confirm your email address to log in.');
+                  return;
+              }
+              throw loginError;
+          }
 
           if (data.user) {
               const { data: profile } = await supabase
@@ -66,6 +76,36 @@ const Login: React.FC = () => {
           setError(err.message || 'Failed to log in');
       } finally {
           setLoading(false);
+      }
+  };
+
+  const handleResendConfirmation = async () => {
+      if (!email) {
+          setError('Please enter your email address');
+          return;
+      }
+
+      setResendingEmail(true);
+      setError('');
+
+      try {
+          const { error } = await supabase.auth.resend({
+              type: 'signup',
+              email: email,
+              options: {
+                  emailRedirectTo: `${window.location.origin}/auth/confirm`,
+              },
+          });
+
+          if (error) throw error;
+
+          setError('');
+          setNeedsConfirmation(false);
+          alert('Confirmation email sent! Please check your inbox.');
+      } catch (err: any) {
+          setError(err.message || 'Failed to resend confirmation email');
+      } finally {
+          setResendingEmail(false);
       }
   };
 
@@ -101,6 +141,16 @@ const Login: React.FC = () => {
                 {error && (
                     <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
                         <p className="text-red-400 text-sm text-center">{error}</p>
+                        {needsConfirmation && (
+                            <button
+                                type="button"
+                                onClick={handleResendConfirmation}
+                                disabled={resendingEmail}
+                                className="mt-3 w-full py-2 bg-primary/20 hover:bg-primary/30 text-primary rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {resendingEmail ? 'Sending...' : 'Resend confirmation email'}
+                            </button>
+                        )}
                     </div>
                 )}
 

@@ -13,6 +13,7 @@ const Signup: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [emailSent, setEmailSent] = useState(false);
 
   useEffect(() => {
       // Trigger animation after mount
@@ -45,13 +46,20 @@ const Signup: React.FC = () => {
           const { data, error: signupError } = await supabase.auth.signUp({
               email,
               password,
+              options: {
+                  emailRedirectTo: `${window.location.origin}/auth/confirm`,
+              },
           });
 
           if (signupError) throw signupError;
 
           if (data.user) {
-              setTempUserData({ name: email.split('@')[0] });
-              navigate('/username-setup');
+              if (data.session) {
+                  setTempUserData({ name: email.split('@')[0] });
+                  navigate('/username-setup');
+              } else {
+                  setEmailSent(true);
+              }
           }
       } catch (err: any) {
           setError(err.message || 'Failed to create account');
@@ -89,16 +97,38 @@ const Signup: React.FC = () => {
             </div>
 
             <div className="flex-1 overflow-y-auto px-6 pb-safe-pb">
-                <div className="flex flex-col space-y-3 mb-6">
-                    <button onClick={() => navigate('/username-setup')} className="w-full py-3.5 px-4 bg-[#1F2937] hover:bg-[#2d3748] border border-white/10 rounded-full flex items-center justify-center space-x-3 transition-colors group">
-                        <Icon name="android" className="text-white text-lg" />
-                        <span className="text-white font-medium text-sm">Continue with Google</span>
-                    </button>
-                    <button onClick={() => navigate('/username-setup')} className="w-full py-3.5 px-4 bg-[#1F2937] hover:bg-[#2d3748] border border-white/10 rounded-full flex items-center justify-center space-x-3 transition-colors group">
-                        <Icon name="apple" className="text-white text-lg" />
-                        <span className="text-white font-medium text-sm">Continue with Apple</span>
-                    </button>
-                </div>
+                {emailSent ? (
+                    <div className="text-center py-8 animate-fade-in">
+                        <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-primary/20">
+                            <Icon name="mark_email_read" className="text-primary text-4xl" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-white mb-3">Check your email</h3>
+                        <p className="text-slate-400 mb-4 leading-relaxed">
+                            We've sent a confirmation link to<br/>
+                            <span className="text-white font-medium">{email}</span>
+                        </p>
+                        <p className="text-sm text-slate-500 mb-8">
+                            Click the link in the email to confirm your account and continue setup.
+                        </p>
+                        <button
+                            onClick={handleClose}
+                            className="w-full py-4 bg-white/10 hover:bg-white/20 active:scale-[0.98] transition-all rounded-xl text-white font-bold"
+                        >
+                            Got it
+                        </button>
+                    </div>
+                ) : (
+                    <>
+                        <div className="flex flex-col space-y-3 mb-6">
+                            <button onClick={() => navigate('/username-setup')} className="w-full py-3.5 px-4 bg-[#1F2937] hover:bg-[#2d3748] border border-white/10 rounded-full flex items-center justify-center space-x-3 transition-colors group">
+                                <Icon name="android" className="text-white text-lg" />
+                                <span className="text-white font-medium text-sm">Continue with Google</span>
+                            </button>
+                            <button onClick={() => navigate('/username-setup')} className="w-full py-3.5 px-4 bg-[#1F2937] hover:bg-[#2d3748] border border-white/10 rounded-full flex items-center justify-center space-x-3 transition-colors group">
+                                <Icon name="apple" className="text-white text-lg" />
+                                <span className="text-white font-medium text-sm">Continue with Apple</span>
+                            </button>
+                        </div>
 
                 <div className="relative flex items-center py-2 mb-6">
                     <div className="flex-grow border-t border-slate-700"></div>
@@ -172,11 +202,13 @@ const Signup: React.FC = () => {
                     </div>
                 </form>
 
-                <div className="pb-6">
-                    <p className="text-center text-xs text-slate-500">
-                        By signing up, you agree to our <a className="text-slate-400 underline hover:text-primary transition-colors" href="#">Terms</a> and <a className="text-slate-400 underline hover:text-primary transition-colors" href="#">Privacy Policy</a>.
-                    </p>
-                </div>
+                        <div className="pb-6">
+                            <p className="text-center text-xs text-slate-500">
+                                By signing up, you agree to our <a className="text-slate-400 underline hover:text-primary transition-colors" href="#">Terms</a> and <a className="text-slate-400 underline hover:text-primary transition-colors" href="#">Privacy Policy</a>.
+                            </p>
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     </div>
