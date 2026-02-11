@@ -30,16 +30,16 @@ const Paywall: React.FC = () => {
 
         <main className="relative z-10 flex flex-col h-full px-5 pt-safe-pt pb-safe-pb">
             {/* Header - Pushed down to create space at the top */}
-            <div className="flex-none text-center mt-10 mb-4 transition-all duration-300">
-                <div className="inline-flex items-center justify-center p-3 mb-3 rounded-2xl bg-gradient-to-tr from-gold/20 to-gold/5 ring-1 ring-gold/30 shadow-2xl shadow-gold/10">
-                    <svg className="w-10 h-10 text-gold drop-shadow-[0_0_8px_rgba(255,215,0,0.5)]" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <div className="flex-none text-center mt-4 mb-2 transition-all duration-300">
+                <div className="inline-flex items-center justify-center p-2.5 mb-2 rounded-2xl bg-gradient-to-tr from-gold/20 to-gold/5 ring-1 ring-gold/30 shadow-2xl shadow-gold/10">
+                    <svg className="w-8 h-8 sm:w-10 sm:h-10 text-gold drop-shadow-[0_0_8px_rgba(255,215,0,0.5)]" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <rect height="18" rx="4" width="18" x="3" y="3"></rect>
                         <path d="M8 7v10"></path>
                         <path d="M12 7v10"></path>
                         <path d="M16 7l-1 10"></path>
                     </svg>
                 </div>
-                <h1 className="text-3xl font-black tracking-tight mb-1 text-white">
+                <h1 className="text-2xl sm:text-3xl font-black tracking-tight mb-1 text-white">
                     MangaShelf<span className="text-gold">+</span>
                 </h1>
                 <p className="text-slate-400 text-xs font-medium">Unlock the ultimate collector's experience.</p>
@@ -124,7 +124,7 @@ const Paywall: React.FC = () => {
                         <Icon name="arrow_forward" className="text-lg group-hover:translate-x-1 transition-transform" />
                     </button>
                     <div className="text-center">
-                        <button onClick={handleFinish} className="w-full py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg text-sm font-bold transition-all active:scale-95">
+                        <button onClick={handleFinish} className="w-full py-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg text-sm font-bold transition-all active:scale-95">
                             Continue with Limited Version
                         </button>
                         <div className="flex justify-center items-center gap-4 text-[10px] text-slate-600 uppercase tracking-wider font-semibold mt-1">

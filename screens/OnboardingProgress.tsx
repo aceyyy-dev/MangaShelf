@@ -15,11 +15,10 @@ const OnboardingProgress: React.FC = () => {
         
         <main className="relative z-10 flex flex-col h-full px-6 pt-safe-pt pb-safe-pb">
             {/* Visual Section - Centered Card */}
-            <div className="flex-1 flex flex-col items-center justify-center min-h-0 relative py-4 mt-8">
+            <div className="flex-1 flex flex-col items-center justify-center min-h-0 relative py-2 mt-2">
                 <div className="absolute w-64 h-64 bg-chart-teal/10 rounded-full blur-[80px] pointer-events-none"></div>
-                
-                {/* Dashboard Card - Styled to match the Phone aesthetic but for stats */}
-                <div className="relative w-60 aspect-[3/4] max-h-[48vh] bg-slate-900 rounded-[2.25rem] border-[1px] border-slate-700/50 shadow-2xl overflow-hidden flex flex-col z-10 ring-1 ring-black/50">
+
+                <div className="relative w-52 sm:w-60 aspect-[3/4] max-h-[38vh] bg-slate-900 rounded-[2.25rem] border-[1px] border-slate-700/50 shadow-2xl overflow-hidden flex flex-col z-10 ring-1 ring-black/50">
                     {/* Glossy overlay */}
                     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none z-20"></div>
 
@@ -81,8 +80,8 @@ const OnboardingProgress: React.FC = () => {
             </div>
 
             {/* Content Section */}
-            <div className="flex flex-col items-center text-center space-y-4 px-2 shrink-0 pb-6">
-                <h2 className="text-3xl font-extrabold text-white leading-tight tracking-tight">
+            <div className="flex flex-col items-center text-center space-y-2 px-2 shrink-0 pb-2">
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight tracking-tight">
                     Track <span className="text-chart-teal">progress</span> like a<br/>collector
                 </h2>
                 <p className="text-sm text-slate-300 font-light leading-relaxed max-w-sm">
@@ -107,7 +106,7 @@ const OnboardingProgress: React.FC = () => {
             </div>
 
             {/* Footer */}
-            <div className="flex flex-col items-center gap-4 w-full mt-auto shrink-0 pb-8">
+            <div className="flex flex-col items-center gap-3 w-full mt-auto shrink-0 pb-4">
                 <div className="flex items-center space-x-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-slate-700 transition-colors"></div>
                     <div className="w-1.5 h-1.5 rounded-full bg-slate-700 transition-colors"></div>
@@ -116,15 +115,15 @@ const OnboardingProgress: React.FC = () => {
                 </div>
 
                 <div className="flex gap-3 w-full">
-                    <button 
+                    <button
                         onClick={() => navigate(-1)}
-                        className="flex-1 py-4 bg-slate-800/80 hover:bg-slate-700 active:scale-[0.98] transition-all duration-200 rounded-full text-white font-bold text-lg border border-slate-700 backdrop-blur-sm"
+                        className="flex-1 py-3.5 bg-slate-800/80 hover:bg-slate-700 active:scale-[0.98] transition-all duration-200 rounded-full text-white font-bold text-base border border-slate-700 backdrop-blur-sm"
                     >
                         Back
                     </button>
-                    <button 
+                    <button
                         onClick={() => navigate('/paywall')}
-                        className="flex-[2] py-4 bg-cream hover:bg-[#ebdcb0] active:scale-[0.98] transition-all duration-200 rounded-full text-background-dark font-bold text-lg shadow-lg flex items-center justify-center group"
+                        className="flex-[2] py-3.5 bg-cream hover:bg-[#ebdcb0] active:scale-[0.98] transition-all duration-200 rounded-full text-background-dark font-bold text-base shadow-lg flex items-center justify-center group"
                     >
                         <span>Continue</span>
                         <Icon name="arrow_forward" className="ml-2 text-xl group-hover:translate-x-1 transition-transform" />

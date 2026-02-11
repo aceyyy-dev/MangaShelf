@@ -15,11 +15,10 @@ const ScanOnboarding: React.FC = () => {
         
         <main className="relative z-10 flex flex-col h-full px-6 pt-safe-pt pb-safe-pb">
             {/* Visual Section */}
-            <div className="flex-1 flex flex-col items-center justify-center min-h-0 relative py-4 mt-8">
+            <div className="flex-1 flex flex-col items-center justify-center min-h-0 relative py-2 mt-2">
                 <div className="absolute w-64 h-64 bg-primary/10 rounded-full blur-[80px] pointer-events-none"></div>
-                
-                {/* Phone Frame - Taller and narrower aspect ratio for a more modern look */}
-                <div className="relative w-48 aspect-[9/23] max-h-[50vh] bg-slate-900 rounded-[2.25rem] border-[4px] border-slate-700 shadow-2xl overflow-hidden flex flex-col ring-1 ring-black/50 z-10">
+
+                <div className="relative w-40 sm:w-48 aspect-[9/23] max-h-[40vh] bg-slate-900 rounded-[2.25rem] border-[4px] border-slate-700 shadow-2xl overflow-hidden flex flex-col ring-1 ring-black/50 z-10">
                     
                     {/* Dynamic Island / Notch */}
                     <div className="absolute top-0 left-0 right-0 h-6 z-30 flex justify-center items-start pt-2 pointer-events-none">
@@ -78,8 +77,8 @@ const ScanOnboarding: React.FC = () => {
             </div>
 
             {/* Content Section */}
-            <div className="flex flex-col items-center text-center space-y-4 px-2 shrink-0 pb-6">
-                <h2 className="text-3xl font-extrabold text-white leading-tight tracking-tight">
+            <div className="flex flex-col items-center text-center space-y-2 px-2 shrink-0 pb-2">
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight tracking-tight">
                     <span className="text-blue-400">Scan</span> and catalog<br/>your collection
                 </h2>
                 <p className="text-sm text-slate-300 font-light leading-relaxed max-w-sm">
@@ -99,7 +98,7 @@ const ScanOnboarding: React.FC = () => {
             </div>
 
             {/* Footer with increased bottom padding */}
-            <div className="flex flex-col items-center gap-4 w-full mt-auto shrink-0 pb-8">
+            <div className="flex flex-col items-center gap-3 w-full mt-auto shrink-0 pb-4">
                 <div className="flex items-center space-x-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-slate-700 transition-colors"></div>
                     <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(17,82,212,0.8)] transition-all"></div>
@@ -108,7 +107,7 @@ const ScanOnboarding: React.FC = () => {
                 </div>
                 <button 
                     onClick={() => navigate('/onboarding-progress')}
-                    className="w-full py-4 px-6 bg-cream hover:bg-[#ebdcb0] active:scale-[0.98] transition-all duration-200 rounded-full text-background-dark font-bold text-lg shadow-lg flex items-center justify-center group"
+                    className="w-full py-3.5 px-6 bg-cream hover:bg-[#ebdcb0] active:scale-[0.98] transition-all duration-200 rounded-full text-background-dark font-bold text-base shadow-lg flex items-center justify-center group"
                 >
                     <span>Continue</span>
                     <Icon name="arrow_forward" className="ml-2 text-xl group-hover:translate-x-1 transition-transform" />
