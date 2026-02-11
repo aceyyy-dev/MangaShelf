@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useMemo, ReactNode, useEffect } from 'react';
 import { Series, Volume, UserStats, UserProfile } from './types';
 import { MOCK_SERIES, MOCK_VOLUMES } from './constants';
+import { supabase } from './supabase';
 
 const PLACEHOLDER_COVER = "https://placehold.co/400x600/1e293b/ffffff?text=?";
 
@@ -44,10 +45,71 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [userProfile, setUserProfile] = useState<UserProfile>({
       name: "",
       username: "guest",
-      avatarUrl: "", 
+      avatarUrl: "",
       joinDate: new Date().getFullYear().toString(),
-      lastUsernameChange: null 
+      lastUsernameChange: null
   });
+
+  // Check for existing session on mount
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .maybeSingle();
+
+        if (profile) {
+          setUserProfile({
+            name: profile.name || '',
+            username: profile.username || 'user',
+            avatarUrl: profile.avatar_url || '',
+            joinDate: profile.join_date || new Date().getFullYear().toString(),
+            lastUsernameChange: profile.last_username_change || null,
+          });
+        }
+      }
+    };
+
+    checkSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .maybeSingle();
+
+          if (profile) {
+            setUserProfile({
+              name: profile.name || '',
+              username: profile.username || 'user',
+              avatarUrl: profile.avatar_url || '',
+              joinDate: profile.join_date || new Date().getFullYear().toString(),
+              lastUsernameChange: profile.last_username_change || null,
+            });
+          }
+        } else if (event === 'SIGNED_OUT') {
+          setUserProfile({
+            name: "",
+            username: "guest",
+            avatarUrl: "",
+            joinDate: new Date().getFullYear().toString(),
+            lastUsernameChange: null,
+          });
+        }
+      })
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   // Dynamic Stats Calculation
   const stats = useMemo((): UserStats => {
@@ -197,7 +259,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       return takenUsernames.has(username.toLowerCase());
   };
 
-  const updateUserProfile = (updates: Partial<UserProfile>) => {
+  const updateUserProfile = async (updates: Partial<UserProfile>) => {
       setUserProfile(prev => {
           const newProfile = { ...prev, ...updates };
           if (updates.username && updates.username !== prev.username) {
@@ -209,9 +271,23 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           }
           return newProfile;
       });
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+          await supabase
+              .from('profiles')
+              .update({
+                  name: updates.name,
+                  username: updates.username?.toLowerCase(),
+                  avatar_url: updates.avatarUrl,
+                  last_username_change: updates.username ? new Date().toISOString() : undefined,
+              })
+              .eq('id', user.id);
+      }
   };
 
-  const logout = () => {
+  const logout = async () => {
+      await supabase.auth.signOut();
       setUserProfile({
           name: "",
           username: "guest",

@@ -1,21 +1,33 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../components/Icon';
+import { supabase } from '../supabase';
 
 const ForgotPassword: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [isSent, setIsSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleReset = (e: React.FormEvent) => {
+  const handleReset = async (e: React.FormEvent) => {
       e.preventDefault();
+      setError('');
       setIsLoading(true);
-      // Simulate network request
-      setTimeout(() => {
+
+      try {
+          const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+              redirectTo: `${window.location.origin}/reset-password`,
+          });
+
+          if (resetError) throw resetError;
+
           setIsSent(true);
+      } catch (err: any) {
+          setError(err.message || 'Failed to send reset email');
+      } finally {
           setIsLoading(false);
-      }, 1500);
+      }
   };
 
   return (
@@ -65,18 +77,28 @@ const ForgotPassword: React.FC = () => {
                     </div>
 
                     <form onSubmit={handleReset} className="space-y-4 w-full max-w-sm mx-auto">
+                        {error && (
+                            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                                <p className="text-red-400 text-sm text-center">{error}</p>
+                            </div>
+                        )}
+
                         <div className="space-y-1">
                             <label className="text-xs font-bold uppercase tracking-wider text-slate-500 pl-1">Email</label>
                             <div className="relative group">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <Icon name="mail" className="text-slate-500 text-lg group-focus-within:text-primary transition-colors" />
                                 </div>
-                                <input 
+                                <input
                                     value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="block w-full pl-11 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-sm" 
-                                    placeholder="otaku@example.com" 
-                                    type="email" 
+                                    onChange={(e) => {
+                                        setEmail(e.target.value);
+                                        setError('');
+                                    }}
+                                    disabled={isLoading}
+                                    className="block w-full pl-11 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-sm"
+                                    placeholder="otaku@example.com"
+                                    type="email"
                                     required
                                 />
                             </div>

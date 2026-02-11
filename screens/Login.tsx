@@ -2,11 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../components/Icon';
 import { useStore } from '../StoreContext';
+import { supabase } from '../supabase';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useStore();
   const [isVisible, setIsVisible] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
       // Trigger animation after mount
@@ -19,15 +25,48 @@ const Login: React.FC = () => {
       setTimeout(() => navigate('/'), 500); // Match new duration
   };
 
-  const handleDirectLogin = () => {
-      login({ name: 'Collector', username: 'collector' });
-      navigate('/home');
-  };
-
-  const handleFormLogin = (e: React.FormEvent) => {
+  const handleFormLogin = async (e: React.FormEvent) => {
       e.preventDefault();
-      login({ name: 'Collector', username: 'collector' });
-      navigate('/home');
+      setError('');
+
+      if (!email || !password) {
+          setError('Please fill in all fields');
+          return;
+      }
+
+      setLoading(true);
+
+      try {
+          const { data, error: loginError } = await supabase.auth.signInWithPassword({
+              email,
+              password,
+          });
+
+          if (loginError) throw loginError;
+
+          if (data.user) {
+              const { data: profile } = await supabase
+                  .from('profiles')
+                  .select('*')
+                  .eq('id', data.user.id)
+                  .maybeSingle();
+
+              if (profile) {
+                  login({
+                      name: profile.name,
+                      username: profile.username,
+                      avatarUrl: profile.avatar_url,
+                      joinDate: profile.join_date,
+                  });
+              }
+
+              navigate('/home');
+          }
+      } catch (err: any) {
+          setError(err.message || 'Failed to log in');
+      } finally {
+          setLoading(false);
+      }
   };
 
   return (
@@ -53,40 +92,64 @@ const Login: React.FC = () => {
             </div>
 
             <div className="flex-1 overflow-y-auto px-6 pb-safe-pb">
-                <div className="space-y-3 mb-6">
-                    <button onClick={handleDirectLogin} className="w-full flex items-center justify-center space-x-3 bg-black text-white py-3.5 rounded-full font-medium hover:bg-gray-900 transition-colors border border-white/10">
-                        <Icon name="apple" className="text-lg" />
-                        <span>Continue with Apple</span>
-                    </button>
-                    <button onClick={handleDirectLogin} className="w-full flex items-center justify-center space-x-3 bg-white text-black border border-slate-200 py-3.5 rounded-full font-medium hover:bg-slate-50 transition-colors">
-                        <Icon name="android" className="text-lg text-green-600" />
-                        <span>Continue with Google</span>
-                    </button>
-                </div>
-
                 <div className="relative flex py-2 items-center mb-6">
                     <div className="flex-grow border-t border-slate-700"></div>
-                    <span className="flex-shrink-0 mx-4 text-slate-400 text-sm">or</span>
+                    <span className="flex-shrink-0 mx-4 text-slate-400 text-sm">Log in with email</span>
                     <div className="flex-grow border-t border-slate-700"></div>
                 </div>
+
+                {error && (
+                    <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                        <p className="text-red-400 text-sm text-center">{error}</p>
+                    </div>
+                )}
 
                 <form onSubmit={handleFormLogin} className="space-y-4">
                     <div className="space-y-1">
                         <label className="sr-only" htmlFor="email">Email</label>
-                        <input className="w-full bg-[#1F2937] border border-slate-600 rounded-xl px-4 py-3.5 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" id="email" placeholder="Email" type="email" />
+                        <input
+                            className="w-full bg-[#1F2937] border border-slate-600 rounded-xl px-4 py-3.5 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                            id="email"
+                            placeholder="Email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            disabled={loading}
+                            required
+                        />
                     </div>
                     <div className="space-y-1 relative">
                         <label className="sr-only" htmlFor="password">Password</label>
-                        <input className="w-full bg-[#1F2937] border border-slate-600 rounded-xl px-4 py-3.5 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all pr-12" id="password" placeholder="Password" type="password" />
-                        <button className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white" type="button">
-                            <span className="material-icons text-xl">visibility_off</span>
+                        <input
+                            className="w-full bg-[#1F2937] border border-slate-600 rounded-xl px-4 py-3.5 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all pr-12"
+                            id="password"
+                            placeholder="Password"
+                            type={showPassword ? 'text' : 'password'}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            disabled={loading}
+                            required
+                        />
+                        <button
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            disabled={loading}
+                        >
+                            <span className="material-icons text-xl">
+                                {showPassword ? 'visibility' : 'visibility_off'}
+                            </span>
                         </button>
                     </div>
                     <div className="flex justify-end">
                         <button type="button" onClick={() => navigate('/forgot-password')} className="text-sm text-primary hover:text-blue-400 font-medium transition-colors">Forgot password?</button>
                     </div>
-                    <button type="submit" className="w-full mt-2 py-4 px-6 bg-cream hover:bg-[#ebdcb0] active:scale-[0.98] transition-all duration-200 rounded-full text-background-dark font-bold text-lg shadow-lg flex items-center justify-center">
-                        <span>Log In</span>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full mt-2 py-4 px-6 bg-cream hover:bg-[#ebdcb0] active:scale-[0.98] transition-all duration-200 rounded-full text-background-dark font-bold text-lg shadow-lg flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <span>{loading ? 'Logging in...' : 'Log In'}</span>
                     </button>
                 </form>
 

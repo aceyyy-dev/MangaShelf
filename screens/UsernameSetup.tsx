@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../StoreContext';
 import Icon from '../components/Icon';
+import { supabase } from '../supabase';
 
 const UsernameSetup: React.FC = () => {
   const navigate = useNavigate();
   const { setTempUserData } = useStore();
   const [username, setUsername] = useState('');
   const [isVisible, setIsVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     // Slight delay to allow mounting before animating in
@@ -15,15 +18,49 @@ const UsernameSetup: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleFinish = () => {
-      // Basic validation
+  const handleFinish = async () => {
       if (!username.trim()) return;
-      
-      // Do NOT log in yet, just save temp data and go to next onboarding step
-      setTempUserData({ username: username, name: username }); // Default name to username
-      
-      // Navigate to the next onboarding page (Scan Onboarding) instead of Home
-      navigate('/scan-onboarding');
+
+      setError('');
+      setLoading(true);
+
+      try {
+          const { data: { user } } = await supabase.auth.getUser();
+
+          if (!user) {
+              setError('Not authenticated');
+              return;
+          }
+
+          const { data: existingProfile } = await supabase
+              .from('profiles')
+              .select('username')
+              .eq('username', username.toLowerCase())
+              .maybeSingle();
+
+          if (existingProfile) {
+              setError('Username already taken');
+              return;
+          }
+
+          const { error: updateError } = await supabase
+              .from('profiles')
+              .update({
+                  username: username.toLowerCase(),
+                  name: username,
+                  updated_at: new Date().toISOString(),
+              })
+              .eq('id', user.id);
+
+          if (updateError) throw updateError;
+
+          setTempUserData({ username: username, name: username });
+          navigate('/scan-onboarding');
+      } catch (err: any) {
+          setError(err.message || 'Failed to set username');
+      } finally {
+          setLoading(false);
+      }
   };
 
   const handleBack = () => {
@@ -56,33 +93,45 @@ const UsernameSetup: React.FC = () => {
             <div className="mb-10 w-full">
                 <div className="relative group">
                     <span className="absolute left-0 top-1/2 -translate-y-1/2 text-slate-500 text-2xl font-medium transition-colors group-focus-within:text-primary">@</span>
-                    <input 
+                    <input
                         autoFocus
                         value={username}
-                        onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))}
-                        className="w-full bg-transparent border-0 border-b-2 border-slate-700 focus:border-primary focus:ring-0 text-white text-3xl font-bold placeholder:text-slate-700 pl-8 pr-4 py-2 transition-all duration-200" 
-                        placeholder="username" 
+                        onChange={(e) => {
+                            setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''));
+                            setError('');
+                        }}
+                        disabled={loading}
+                        className="w-full bg-transparent border-0 border-b-2 border-slate-700 focus:border-primary focus:ring-0 text-white text-3xl font-bold placeholder:text-slate-700 pl-8 pr-4 py-2 transition-all duration-200"
+                        placeholder="username"
                         type="text"
                     />
                 </div>
-                <p className="mt-4 text-xs text-slate-500 flex items-start gap-2">
-                    <Icon name="info" className="text-sm mt-0.5" />
-                    Usernames must be unique and contain no spaces.
-                </p>
+                {error && (
+                    <p className="mt-4 text-sm text-red-400 flex items-start gap-2">
+                        <Icon name="error" className="text-base mt-0.5" />
+                        {error}
+                    </p>
+                )}
+                {!error && (
+                    <p className="mt-4 text-xs text-slate-500 flex items-start gap-2">
+                        <Icon name="info" className="text-sm mt-0.5" />
+                        Usernames must be unique and contain no spaces.
+                    </p>
+                )}
             </div>
 
             <div className="mt-auto pb-6">
-                <button 
+                <button
                     onClick={handleFinish}
-                    disabled={!username.length}
+                    disabled={!username.length || loading}
                     className={`w-full py-4 px-6 rounded-full font-bold text-lg shadow-lg flex items-center justify-center transition-all duration-300 ${
-                        username.length 
-                        ? 'bg-cream hover:bg-[#ebdcb0] active:scale-[0.98] text-background-dark' 
+                        username.length && !loading
+                        ? 'bg-cream hover:bg-[#ebdcb0] active:scale-[0.98] text-background-dark'
                         : 'bg-slate-800 text-slate-500 cursor-not-allowed'
                     }`}
                 >
-                    <span>Finish Setup</span>
-                    <Icon name="check" className="ml-2 text-xl" />
+                    <span>{loading ? 'Saving...' : 'Finish Setup'}</span>
+                    {!loading && <Icon name="check" className="ml-2 text-xl" />}
                 </button>
             </div>
         </div>

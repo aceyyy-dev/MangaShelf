@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../components/Icon';
+import { supabase } from '../supabase';
+import { useStore } from '../StoreContext';
 
 const Signup: React.FC = () => {
   const navigate = useNavigate();
+  const { setTempUserData } = useStore();
   const [isVisible, setIsVisible] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
       // Trigger animation after mount
@@ -17,9 +25,39 @@ const Signup: React.FC = () => {
       setTimeout(() => navigate('/'), 500); // Match new duration
   };
 
-  const handleContinue = (e: React.FormEvent) => {
+  const handleContinue = async (e: React.FormEvent) => {
       e.preventDefault();
-      navigate('/username-setup');
+      setError('');
+
+      if (!email || !password) {
+          setError('Please fill in all fields');
+          return;
+      }
+
+      if (password.length < 6) {
+          setError('Password must be at least 6 characters');
+          return;
+      }
+
+      setLoading(true);
+
+      try {
+          const { data, error: signupError } = await supabase.auth.signUp({
+              email,
+              password,
+          });
+
+          if (signupError) throw signupError;
+
+          if (data.user) {
+              setTempUserData({ name: email.split('@')[0] });
+              navigate('/username-setup');
+          }
+      } catch (err: any) {
+          setError(err.message || 'Failed to create account');
+      } finally {
+          setLoading(false);
+      }
   };
 
   return (
@@ -68,6 +106,12 @@ const Signup: React.FC = () => {
                     <div className="flex-grow border-t border-slate-700"></div>
                 </div>
 
+                {error && (
+                    <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                        <p className="text-red-400 text-sm text-center">{error}</p>
+                    </div>
+                )}
+
                 <form onSubmit={handleContinue} className="flex flex-col space-y-4 mb-4">
                     <div className="group">
                         <label className="sr-only" htmlFor="email">Email address</label>
@@ -75,11 +119,15 @@ const Signup: React.FC = () => {
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <span className="material-icons text-slate-500 text-xl">mail</span>
                             </div>
-                            <input 
-                                className="block w-full pl-11 pr-4 py-4 bg-[#1F2937] border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-sm font-medium" 
-                                id="email" 
-                                placeholder="Email address" 
-                                type="email" 
+                            <input
+                                className="block w-full pl-11 pr-4 py-4 bg-[#1F2937] border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-sm font-medium"
+                                id="email"
+                                placeholder="Email address"
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                disabled={loading}
+                                required
                             />
                         </div>
                     </div>
@@ -89,21 +137,37 @@ const Signup: React.FC = () => {
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <span className="material-icons text-slate-500 text-xl">lock</span>
                             </div>
-                            <input 
-                                className="block w-full pl-11 pr-12 py-4 bg-[#1F2937] border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-sm font-medium" 
-                                id="password" 
-                                placeholder="Password" 
-                                type="password" 
+                            <input
+                                className="block w-full pl-11 pr-12 py-4 bg-[#1F2937] border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-sm font-medium"
+                                id="password"
+                                placeholder="Password (min. 6 characters)"
+                                type={showPassword ? 'text' : 'password'}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                disabled={loading}
+                                required
+                                minLength={6}
                             />
-                            <div className="absolute inset-y-0 right-0 pr-4 flex items-center cursor-pointer">
-                                <span className="material-icons text-slate-500 hover:text-slate-300 transition-colors text-xl">visibility_off</span>
-                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute inset-y-0 right-0 pr-4 flex items-center cursor-pointer"
+                                disabled={loading}
+                            >
+                                <span className="material-icons text-slate-500 hover:text-slate-300 transition-colors text-xl">
+                                    {showPassword ? 'visibility' : 'visibility_off'}
+                                </span>
+                            </button>
                         </div>
                     </div>
-                    
+
                     <div className="pt-2">
-                        <button type="submit" className="w-full py-4 px-6 bg-cream hover:bg-[#ebdcb0] active:scale-[0.98] transition-all duration-200 rounded-full text-background-dark font-bold text-lg shadow-lg flex items-center justify-center">
-                            <span>Continue</span>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full py-4 px-6 bg-cream hover:bg-[#ebdcb0] active:scale-[0.98] transition-all duration-200 rounded-full text-background-dark font-bold text-lg shadow-lg flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <span>{loading ? 'Creating account...' : 'Continue'}</span>
                         </button>
                     </div>
                 </form>
