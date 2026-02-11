@@ -9,6 +9,7 @@ import ScanOnboarding from './screens/ScanOnboarding';
 import OnboardingProgress from './screens/OnboardingProgress';
 import ForgotPassword from './screens/ForgotPassword';
 import EmailConfirmation from './screens/EmailConfirmation';
+import OAuthCallback from './screens/OAuthCallback';
 import Home from './screens/Home';
 import Library from './screens/Library';
 import SeriesDetails from './screens/SeriesDetails';
@@ -64,6 +65,7 @@ const AppContent: React.FC = () => {
             {/* Auth Utilities */}
             <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
             <Route path="/auth/confirm" element={<EmailConfirmation />} />
+            <Route path="/auth/callback" element={<OAuthCallback />} />
 
             {/* Protected Routes */}
             <Route path="/home" element={<RequireAuth><Home /></RequireAuth>} />
