@@ -28,10 +28,10 @@ const Home: React.FC = () => {
   return (
     <div className="h-full overflow-y-auto overflow-x-hidden no-scrollbar pb-24 bg-background-light dark:bg-background-dark">
       {/* Header */}
-      <header className="px-6 pt-safe-pt mt-4 py-4 flex items-center justify-between sticky top-0 z-40 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-transparent transition-all duration-300">
+      <header className="px-6 md:px-8 pt-safe-pt mt-4 py-4 flex items-center justify-between sticky top-0 z-40 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-transparent transition-all duration-300">
         <div>
-          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-0.5">Welcome back,</p>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{userProfile.name}</h1>
+          <p className="text-sm md:text-base text-gray-500 dark:text-gray-400 font-medium mb-0.5">Welcome back,</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{userProfile.name}</h1>
         </div>
         <div className="relative cursor-pointer group" onClick={() => navigate('/profile')}>
           <Avatar src={userProfile.avatarUrl} size="lg" className="border-2 border-primary/20 ring-2 ring-background-light dark:ring-background-dark shadow-sm group-hover:border-primary/50 transition-colors" />
@@ -39,7 +39,7 @@ const Home: React.FC = () => {
         </div>
       </header>
 
-      <main className="px-6 space-y-8 pt-2">
+      <main className="px-6 md:px-8 space-y-8 pt-2 max-w-4xl mx-auto">
         {/* Featured Daily Pick - Visual Interest */}
         {featuredSeries ? (
             <section 

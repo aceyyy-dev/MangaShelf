@@ -46,7 +46,7 @@ const PublicRoute: React.FC<AuthGuardProps> = ({ children }) => {
 // Main Content Wrapper
 const AppContent: React.FC = () => {
   return (
-    <div className="text-slate-900 dark:text-white h-full w-full bg-background-light dark:bg-background-dark overflow-hidden">
+    <div className="text-slate-900 dark:text-white h-full w-full bg-background-light dark:bg-background-dark overflow-hidden relative">
         <Routes>
             {/* Entry Point & Onboarding Flow */}
             {/* Login, Signup, and UsernameSetup are nested to appear as overlays on Onboarding */}
@@ -55,14 +55,14 @@ const AppContent: React.FC = () => {
                 <Route path="signup" element={<Signup />} />
                 <Route path="username-setup" element={<UsernameSetup />} />
             </Route>
-            
+
             {/* Extended Onboarding Steps */}
             <Route path="/scan-onboarding" element={<ScanOnboarding />} />
             <Route path="/onboarding-progress" element={<OnboardingProgress />} />
-            
+
             {/* Auth Utilities */}
             <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
-            
+
             {/* Protected Routes */}
             <Route path="/home" element={<RequireAuth><Home /></RequireAuth>} />
             <Route path="/library" element={<RequireAuth><Library /></RequireAuth>} />

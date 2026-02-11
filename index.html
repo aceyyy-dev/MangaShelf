@@ -45,15 +45,21 @@
       };
     </script>
     <style>
-      html, body, #root {
+      html, body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        position: fixed;
+      }
+      #root {
         height: 100%;
         width: 100%;
         overflow: hidden;
-        margin: 0;
-        padding: 0;
+        position: relative;
       }
       body {
-        /* Mobile-app like scrolling behavior */
         overscroll-behavior-y: none;
         -webkit-tap-highlight-color: transparent;
       }

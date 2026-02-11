@@ -30,19 +30,19 @@ const BottomNav: React.FC = () => {
   const isScan = location.pathname === '/scan';
 
   return (
-    <nav className={`fixed bottom-0 w-full max-w-md left-1/2 -translate-x-1/2 pb-safe pt-2 px-6 z-50 transition-all duration-300 ${
-        isScan 
-        ? 'bg-transparent' // Transparent for scanner
-        : 'glass-panel border-t border-white/5 rounded-t-2xl'
+    <nav className={`fixed bottom-0 left-0 right-0 w-full pb-safe pt-2 px-4 md:px-6 z-50 transition-all duration-300 ${
+        isScan
+        ? 'bg-transparent'
+        : 'glass-panel border-t border-white/5'
     }`}>
-      <div className="flex justify-between items-center h-16">
+      <div className="flex justify-around items-center h-16 max-w-2xl mx-auto">
         {navItems.map((item) => {
           const isActive = location.pathname === '/' && item.path === '/home' || location.pathname.startsWith(item.path);
           return (
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={`flex flex-col items-center justify-center w-14 gap-1 transition-all ${
+              className={`flex flex-col items-center justify-center min-w-[56px] gap-1 transition-all ${
                 isActive ? 'text-primary' : isScan ? 'text-white/70 hover:text-white' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -51,9 +51,9 @@ const BottomNav: React.FC = () => {
                   <Icon name={item.icon} type="round" className="text-xl md:text-2xl" />
                 </div>
               ) : (
-                <Icon name={item.icon} type="outlined" className="text-2xl" />
+                <Icon name={item.icon} type="outlined" className="text-2xl md:text-3xl" />
               )}
-              <span className={`text-[10px] font-medium ${isActive ? 'text-primary' : ''}`}>
+              <span className={`text-[10px] md:text-xs font-medium ${isActive ? 'text-primary' : ''}`}>
                 {item.label}
               </span>
             </button>
