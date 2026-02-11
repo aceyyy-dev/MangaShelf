@@ -14,19 +14,30 @@ const BottomNav: React.FC = () => {
     { path: '/profile', label: 'Profile', icon: 'person' },
   ];
 
-  if (['/', '/onboarding', '/paywall', '/signup', '/login', '/username-setup', '/onboarding-scan'].includes(location.pathname)) return null;
+  const hiddenPaths = [
+      '/', 
+      '/signup', 
+      '/login', 
+      '/username-setup', 
+      '/scan-onboarding', 
+      '/onboarding-progress', 
+      '/paywall',
+      '/forgot-password'
+  ];
+
+  if (hiddenPaths.includes(location.pathname)) return null;
 
   const isScan = location.pathname === '/scan';
 
   return (
     <nav className={`fixed bottom-0 w-full max-w-md left-1/2 -translate-x-1/2 pb-safe pt-2 px-6 z-50 transition-all duration-300 ${
         isScan 
-        ? 'bg-transparent' // Transparent for scanner to overlay on camera/black background
+        ? 'bg-transparent' // Transparent for scanner
         : 'glass-panel border-t border-white/5 rounded-t-2xl'
     }`}>
       <div className="flex justify-between items-center h-16">
         {navItems.map((item) => {
-          const isActive = location.pathname.startsWith(item.path);
+          const isActive = location.pathname === '/' && item.path === '/home' || location.pathname.startsWith(item.path);
           return (
             <button
               key={item.path}

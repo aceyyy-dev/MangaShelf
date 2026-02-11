@@ -9,6 +9,8 @@ interface StoreContextType {
   volumes: Volume[];
   stats: UserStats;
   userProfile: UserProfile;
+  tempUserData: { username?: string; name?: string; };
+  setTempUserData: (data: { username?: string; name?: string; }) => void;
   updateSeries: (updated: Series) => void;
   updateVolume: (updated: Volume) => void;
   addSeries: (series: Series) => void;
@@ -28,14 +30,17 @@ interface StoreContextType {
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Initialize with MOCK data (which is now empty)
+  // Initialize with MOCK data
   const [series, setSeries] = useState<Series[]>(MOCK_SERIES);
   const [volumes, setVolumes] = useState<Volume[]>(MOCK_VOLUMES);
 
   // Mock "Backend" Database of taken usernames
   const [takenUsernames, setTakenUsernames] = useState<Set<string>>(new Set(['admin', 'support']));
 
-  // Start as Guest/Not Logged In
+  // Temporary Data for Signup Flow
+  const [tempUserData, setTempUserData] = useState<{ username?: string; name?: string; }>({});
+
+  // Start as "Guest" by default to trigger onboarding
   const [userProfile, setUserProfile] = useState<UserProfile>({
       name: "",
       username: "guest",
@@ -81,7 +86,6 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     // Automatically generate or remove volumes if totalVolumes changes
     setVolumes(prev => {
-        // 1. Remove volumes that are outside the new range (if totalVolumes decreased)
         let newVols = prev.filter(v => {
             if (v.seriesId === updated.id) {
                 return v.number <= updated.totalVolumes;
@@ -89,7 +93,6 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             return true;
         });
 
-        // 2. Add missing volumes (if totalVolumes increased or gaps exist)
         const seriesVols = newVols.filter(v => v.seriesId === updated.id);
         const existingNumbers = new Set(seriesVols.map(v => v.number));
 
@@ -121,7 +124,6 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   const addVolume = (newVolume: Volume) => {
-    // Ensure dateAdded is present
     const volWithDate = {
         ...newVolume,
         dateAdded: newVolume.dateAdded || new Date().toISOString()
@@ -142,10 +144,9 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           const newVolumes = prev.map(v => v.id === volumeId ? { 
               ...v, 
               isOwned: !v.isOwned,
-              dateAdded: !v.isOwned ? new Date().toISOString() : undefined // Set date when marking as owned
+              dateAdded: !v.isOwned ? new Date().toISOString() : undefined 
           } : v);
           
-          // Update series owned count
           const changedVol = newVolumes.find(v => v.id === volumeId);
           if (changedVol) {
               setSeries(prevSeries => prevSeries.map(s => {
@@ -193,15 +194,12 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   const isUsernameTaken = (username: string): boolean => {
-      // Case insensitive check
       return takenUsernames.has(username.toLowerCase());
   };
 
   const updateUserProfile = (updates: Partial<UserProfile>) => {
       setUserProfile(prev => {
           const newProfile = { ...prev, ...updates };
-          
-          // If username changed, add new one to taken list
           if (updates.username && updates.username !== prev.username) {
               setTakenUsernames(prevTaken => {
                   const newSet = new Set(prevTaken);
@@ -221,21 +219,22 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           joinDate: new Date().getFullYear().toString(),
           lastUsernameChange: null
       });
-      // Optionally clear data on logout, but for now we keep local data state
+      setTempUserData({});
   };
 
   const login = (profile?: Partial<UserProfile>) => {
-      setUserProfile({
+      setUserProfile(prev => ({
+          ...prev,
           name: profile?.name || "Collector",
           username: profile?.username || "collector",
-          avatarUrl: profile?.avatarUrl || "", 
-          joinDate: new Date().getFullYear().toString(),
+          avatarUrl: profile?.avatarUrl || prev.avatarUrl,
+          joinDate: prev.joinDate || new Date().getFullYear().toString(),
           lastUsernameChange: null 
-      });
+      }));
   };
 
   return (
-    <StoreContext.Provider value={{ series, volumes, stats, userProfile, updateSeries, updateVolume, addSeries, addVolume, toggleVolumeFavorite, toggleVolumeWishlist, toggleVolumeOwned, deleteSeries, deleteVolume, restoreData, updateUserProfile, isUsernameTaken, logout, login }}>
+    <StoreContext.Provider value={{ series, volumes, stats, userProfile, tempUserData, setTempUserData, updateSeries, updateVolume, addSeries, addVolume, toggleVolumeFavorite, toggleVolumeWishlist, toggleVolumeOwned, deleteSeries, deleteVolume, restoreData, updateUserProfile, isUsernameTaken, logout, login }}>
       {children}
     </StoreContext.Provider>
   );

@@ -1,11 +1,12 @@
 import React from 'react';
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { MemoryRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import BottomNav from './components/BottomNav';
 import Onboarding from './screens/Onboarding';
 import Signup from './screens/Signup';
 import Login from './screens/Login';
 import UsernameSetup from './screens/UsernameSetup';
 import ScanOnboarding from './screens/ScanOnboarding';
+import OnboardingProgress from './screens/OnboardingProgress';
 import ForgotPassword from './screens/ForgotPassword';
 import Home from './screens/Home';
 import Library from './screens/Library';
@@ -20,44 +21,49 @@ import TopAuthors from './screens/TopAuthors';
 import SeriesCompletion from './screens/SeriesCompletion';
 import { StoreProvider, useStore } from './StoreContext';
 
+interface AuthGuardProps {
+  children: React.ReactNode;
+}
+
 // Guard: Only allow access if user is logged in (not guest)
-const RequireAuth = ({ children }: { children: React.ReactElement }) => {
+const RequireAuth: React.FC<AuthGuardProps> = ({ children }) => {
   const { userProfile } = useStore();
   if (userProfile.username === 'guest') {
     return <Navigate to="/" replace />;
   }
-  return children;
+  return <>{children}</>;
 };
 
-// Guard: Only allow access if user is Guest (e.g. Onboarding/Login screens)
-const PublicRoute = ({ children }: { children: React.ReactElement }) => {
+// Guard: Only allow access if user is Guest
+const PublicRoute: React.FC<AuthGuardProps> = ({ children }) => {
    const { userProfile } = useStore();
    if (userProfile.username !== 'guest') {
      return <Navigate to="/home" replace />;
    }
-   return children;
+   return <>{children}</>;
 };
 
-// Main Content Wrapper to access Store Context
+// Main Content Wrapper
 const AppContent: React.FC = () => {
   return (
     <div className="text-slate-900 dark:text-white h-full w-full bg-background-light dark:bg-background-dark overflow-hidden">
         <Routes>
-            {/* Entry Point - Onboarding is now the Root Route */}
-            <Route path="/" element={<PublicRoute><Onboarding /></PublicRoute>} />
+            {/* Entry Point & Onboarding Flow */}
+            {/* Login, Signup, and UsernameSetup are nested to appear as overlays on Onboarding */}
+            <Route path="/" element={<PublicRoute><Onboarding /></PublicRoute>}>
+                <Route path="login" element={<Login />} />
+                <Route path="signup" element={<Signup />} />
+                <Route path="username-setup" element={<UsernameSetup />} />
+            </Route>
             
-            {/* Public Routes - Accessible only to Guests */}
-            <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
-            <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+            {/* Extended Onboarding Steps */}
+            <Route path="/scan-onboarding" element={<ScanOnboarding />} />
+            <Route path="/onboarding-progress" element={<OnboardingProgress />} />
+            
+            {/* Auth Utilities */}
             <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
             
-            {/* Username Setup - Accessible to guests (before final login) */}
-            <Route path="/username-setup" element={<PublicRoute><UsernameSetup /></PublicRoute>} />
-            
-            {/* New Onboarding Step - Accessible after "login" action in UsernameSetup */}
-            <Route path="/onboarding-scan" element={<RequireAuth><ScanOnboarding /></RequireAuth>} />
-            
-            {/* Protected Routes - Accessible only to Logged In Users */}
+            {/* Protected Routes */}
             <Route path="/home" element={<RequireAuth><Home /></RequireAuth>} />
             <Route path="/library" element={<RequireAuth><Library /></RequireAuth>} />
             <Route path="/series/:id" element={<RequireAuth><SeriesDetails /></RequireAuth>} />
@@ -68,7 +74,7 @@ const AppContent: React.FC = () => {
             <Route path="/series-completion" element={<RequireAuth><SeriesCompletion /></RequireAuth>} />
             <Route path="/top-authors" element={<RequireAuth><TopAuthors /></RequireAuth>} />
             <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
-            <Route path="/paywall" element={<RequireAuth><Paywall /></RequireAuth>} />
+            <Route path="/paywall" element={<Paywall />} />
         </Routes>
         <BottomNav />
     </div>
