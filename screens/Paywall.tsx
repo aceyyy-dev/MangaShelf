@@ -2,17 +2,44 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../components/Icon';
 import { useStore } from '../StoreContext';
+import { supabase } from '../supabase';
 
 const Paywall: React.FC = () => {
   const navigate = useNavigate();
-  const { login, tempUserData } = useStore();
+  const { login } = useStore();
 
-  const handleFinish = () => {
-      login({ 
-          name: tempUserData.name || 'Collector', 
-          username: tempUserData.username || 'collector' 
-      });
-      navigate('/home');
+  const handleFinish = async () => {
+      try {
+          console.log('Completing onboarding, fetching final profile...');
+
+          // Get the current user
+          const { data: { user } } = await supabase.auth.getUser();
+
+          if (user) {
+              // Fetch the complete profile from database
+              const { data: profile } = await supabase
+                  .from('profiles')
+                  .select('*')
+                  .eq('id', user.id)
+                  .maybeSingle();
+
+              if (profile) {
+                  console.log('Onboarding complete for user:', profile.username);
+                  login({
+                      name: profile.name,
+                      username: profile.username,
+                      avatarUrl: profile.avatar_url,
+                      joinDate: profile.join_date,
+                  });
+              }
+          }
+
+          navigate('/home');
+      } catch (error) {
+          console.error('Error completing onboarding:', error);
+          // Still navigate to home even if there's an error
+          navigate('/home');
+      }
   };
 
   return (

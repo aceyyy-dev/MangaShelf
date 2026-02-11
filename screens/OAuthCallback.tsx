@@ -34,19 +34,38 @@ const OAuthCallback: React.FC = () => {
         if (!mounted) return;
 
         if (profile) {
-          console.log('Found existing profile:', profile.username);
-          login({
-            name: profile.name,
-            username: profile.username,
-            avatarUrl: profile.avatar_url,
-            joinDate: profile.join_date,
-          });
+          // Check if user has completed onboarding (username doesn't start with 'temp_')
+          if (profile.username.startsWith('temp_')) {
+            console.log('Incomplete profile detected, redirecting to username setup');
+            const name = profile.name ||
+                        session.user.user_metadata?.full_name ||
+                        session.user.user_metadata?.name ||
+                        session.user.email?.split('@')[0] ||
+                        'User';
 
-          setStatus('success');
-          setTimeout(() => {
-            if (mounted) navigate('/home');
-          }, 1000);
+            setTempUserData({ name });
+            setStatus('success');
+
+            setTimeout(() => {
+              if (mounted) navigate('/username-setup');
+            }, 1000);
+          } else {
+            // Existing user with complete profile - go to home
+            console.log('Found existing profile:', profile.username);
+            login({
+              name: profile.name,
+              username: profile.username,
+              avatarUrl: profile.avatar_url,
+              joinDate: profile.join_date,
+            });
+
+            setStatus('success');
+            setTimeout(() => {
+              if (mounted) navigate('/home');
+            }, 1000);
+          }
         } else {
+          // No profile found (shouldn't happen with trigger, but handle it)
           console.log('No profile found, creating new user flow');
           const name = session.user.user_metadata?.full_name ||
                       session.user.user_metadata?.name ||

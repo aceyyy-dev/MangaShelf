@@ -6,7 +6,7 @@ import { supabase } from '../supabase';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { login } = useStore();
+  const { login, setTempUserData } = useStore();
   const [isVisible, setIsVisible] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -91,15 +91,31 @@ const Login: React.FC = () => {
                   .maybeSingle();
 
               if (profile) {
+                  // Check if user has completed onboarding (username doesn't start with 'temp_')
+                  if (profile.username.startsWith('temp_')) {
+                      console.log('Incomplete profile detected, redirecting to username setup');
+                      const name = profile.name || data.user.email?.split('@')[0] || 'User';
+                      setTempUserData({ name });
+                      navigate('/username-setup');
+                      return;
+                  }
+
+                  // Existing user with complete profile - go to home
+                  console.log('Existing user logged in:', profile.username);
                   login({
                       name: profile.name,
                       username: profile.username,
                       avatarUrl: profile.avatar_url,
                       joinDate: profile.join_date,
                   });
+                  navigate('/home');
+              } else {
+                  // No profile found (shouldn't happen with trigger, but handle it)
+                  console.log('No profile found, creating new user flow');
+                  const name = data.user.email?.split('@')[0] || 'User';
+                  setTempUserData({ name });
+                  navigate('/username-setup');
               }
-
-              navigate('/home');
           }
       } catch (err: any) {
           setError(err.message || 'Failed to log in');

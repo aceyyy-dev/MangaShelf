@@ -26,10 +26,20 @@ const EmailConfirmation: React.FC = () => {
           if (error) throw error;
 
           if (session?.user) {
-            const email = session.user.email || '';
-            setTempUserData({ name: email.split('@')[0] });
+            console.log('Email confirmed for user:', session.user.id);
+
+            // Get the profile to extract the name
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('name')
+              .eq('id', session.user.id)
+              .maybeSingle();
+
+            const name = profile?.name || session.user.email?.split('@')[0] || 'User';
+            setTempUserData({ name });
             setStatus('success');
 
+            console.log('Redirecting to username setup');
             setTimeout(() => {
               navigate('/username-setup');
             }, 2000);
@@ -42,10 +52,20 @@ const EmailConfirmation: React.FC = () => {
           if (error) throw error;
 
           if (session?.user) {
-            const email = session.user.email || '';
-            setTempUserData({ name: email.split('@')[0] });
+            console.log('Email confirmed for user (existing session):', session.user.id);
+
+            // Get the profile to extract the name
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('name')
+              .eq('id', session.user.id)
+              .maybeSingle();
+
+            const name = profile?.name || session.user.email?.split('@')[0] || 'User';
+            setTempUserData({ name });
             setStatus('success');
 
+            console.log('Redirecting to username setup');
             setTimeout(() => {
               navigate('/username-setup');
             }, 2000);

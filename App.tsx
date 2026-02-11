@@ -51,14 +51,14 @@ const AppContent: React.FC = () => {
     <div className="text-slate-900 dark:text-white h-full w-full bg-background-light dark:bg-background-dark overflow-hidden relative">
         <Routes>
             {/* Entry Point & Onboarding Flow */}
-            {/* Login, Signup, and UsernameSetup are nested to appear as overlays on Onboarding */}
+            {/* Login and Signup are nested to appear as overlays on Onboarding */}
             <Route path="/" element={<PublicRoute><Onboarding /></PublicRoute>}>
                 <Route path="login" element={<Login />} />
                 <Route path="signup" element={<Signup />} />
-                <Route path="username-setup" element={<UsernameSetup />} />
             </Route>
 
-            {/* Extended Onboarding Steps */}
+            {/* Extended Onboarding Steps (not nested - for new user flow) */}
+            <Route path="/username-setup" element={<UsernameSetup />} />
             <Route path="/scan-onboarding" element={<ScanOnboarding />} />
             <Route path="/onboarding-progress" element={<OnboardingProgress />} />
 
