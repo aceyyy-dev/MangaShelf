@@ -42,5 +42,16 @@ export interface UserProfile {
   username: string;
   avatarUrl: string;
   joinDate: string;
-  lastUsernameChange: string | null; // ISO Date string
+  lastUsernameChange: string | null;
+  subscriptionStatus?: 'free' | 'premium' | 'expired';
+  subscriptionTier?: 'monthly' | 'yearly' | null;
+  subscriptionExpiresAt?: string | null;
+}
+
+export interface SubscriptionStatus {
+  isPremium: boolean;
+  status: 'free' | 'premium' | 'expired';
+  tier: 'monthly' | 'yearly' | null;
+  expiresAt: string | null;
+  willRenew: boolean;
 }

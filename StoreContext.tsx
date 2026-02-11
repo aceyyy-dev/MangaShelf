@@ -69,6 +69,9 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             avatarUrl: profile.avatar_url || '',
             joinDate: profile.join_date || new Date().getFullYear().toString(),
             lastUsernameChange: profile.last_username_change || null,
+            subscriptionStatus: profile.subscription_status || 'free',
+            subscriptionTier: profile.subscription_tier || null,
+            subscriptionExpiresAt: profile.subscription_expires_at || null,
           });
         }
       }
@@ -92,6 +95,9 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
               avatarUrl: profile.avatar_url || '',
               joinDate: profile.join_date || new Date().getFullYear().toString(),
               lastUsernameChange: profile.last_username_change || null,
+              subscriptionStatus: profile.subscription_status || 'free',
+              subscriptionTier: profile.subscription_tier || null,
+              subscriptionExpiresAt: profile.subscription_expires_at || null,
             });
           }
         } else if (event === 'SIGNED_OUT') {

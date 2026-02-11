@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 import Icon from '../components/Icon';
+import PremiumLock from '../components/PremiumLock';
 import { useStore } from '../StoreContext';
 import { GoogleGenAI } from "@google/genai";
 import { useNavigate } from 'react-router-dom';
@@ -361,56 +362,58 @@ const Insights: React.FC = () => {
         </div>
 
         {/* Sensei AI Card */}
-        <div className="bg-gradient-to-b from-primary/10 to-transparent dark:from-primary/5 dark:to-transparent rounded-2xl p-5 border border-primary/20 dark:border-primary/20 shadow-sm relative overflow-hidden">
-            <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 relative">
-                    <div className="w-16 h-16 rounded-2xl bg-slate-800 flex items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(25,120,229,0.3)] border border-primary/30">
-                        <img 
-                            alt="Sensei Owl Avatar" 
-                            className="w-full h-full object-cover" 
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBW_oT8qiDyhpFrthBaA806F4EOzx200n-m2b8lrN4_XsN5lc0kkMXdR2a6BSbi2_sPQl5qjHZdhysGzrM4hICZsS05Bu5QSBkHS2Zs2D3sjcu-JC7J7WlklrhkC7Vdy9ADsaRgSeGCCIuPYf_RPNaQA6sQ7DyZy1ZK-Sx1gR2wpIfoXVgHnJX_jd3EW8Jsn_DgOtBuqXs8IL9RMeonbbCUtJf-6mM2m9baRhoi6wZMt3WngeVBf3SC1XzlDOs7wF1wVWha_sYOVOw"
-                        />
-                    </div>
-                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white dark:border-surface-dark flex items-center justify-center">
-                        <Icon name="smart_toy" className="text-[10px] text-white" />
-                    </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                        <h2 className="text-lg font-bold text-slate-900 dark:text-white">Sensei</h2>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-gradient-to-r from-blue-500 to-cyan-500 text-white uppercase tracking-wider">Beta</span>
-                    </div>
-                    {aiResponse ? (
-                        <p className="text-sm text-slate-800 dark:text-slate-200 leading-relaxed mb-4 bg-white/50 dark:bg-black/20 p-3 rounded-lg border border-primary/10 animate-fade-in">{aiResponse}</p>
-                    ) : (
-                        <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-                            Your personal manga guide. Ask me anything about your collection or new series.
-                        </p>
-                    )}
-                    
-                    <div className="flex gap-2">
-                        <div className="relative flex-1">
-                            <input 
-                                className="w-full bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-full py-2 px-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50" 
-                                placeholder={loading ? "Thinking..." : "Ask Sensei..."} 
-                                type="text"
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleAskAI()}
-                                disabled={loading}
-                            />
-                        </div>
-                        <button 
-                            onClick={handleAskAI}
-                            disabled={loading || !query.trim()}
-                            className="bg-primary hover:bg-primary/90 text-white rounded-full p-2 flex items-center justify-center transition-colors shadow-lg shadow-primary/20 disabled:opacity-70"
-                        >
-                            <Icon name={loading ? "hourglass_empty" : "send"} className={`text-sm ${loading ? 'animate-spin' : ''}`} />
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <PremiumLock featureName="AI Manga Sensei" overlay={true}>
+          <div className="bg-gradient-to-b from-primary/10 to-transparent dark:from-primary/5 dark:to-transparent rounded-2xl p-5 border border-primary/20 dark:border-primary/20 shadow-sm relative overflow-hidden">
+              <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 relative">
+                      <div className="w-16 h-16 rounded-2xl bg-slate-800 flex items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(25,120,229,0.3)] border border-primary/30">
+                          <img
+                              alt="Sensei Owl Avatar"
+                              className="w-full h-full object-cover"
+                              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBW_oT8qiDyhpFrthBaA806F4EOzx200n-m2b8lrN4_XsN5lc0kkMXdR2a6BSbi2_sPQl5qjHZdhysGzrM4hICZsS05Bu5QSBkHS2Zs2D3sjcu-JC7J7WlklrhkC7Vdy9ADsaRgSeGCCIuPYf_RPNaQA6sQ7DyZy1ZK-Sx1gR2wpIfoXVgHnJX_jd3EW8Jsn_DgOtBuqXs8IL9RMeonbbCUtJf-6mM2m9baRhoi6wZMt3WngeVBf3SC1XzlDOs7wF1wVWha_sYOVOw"
+                          />
+                      </div>
+                      <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white dark:border-surface-dark flex items-center justify-center">
+                          <Icon name="smart_toy" className="text-[10px] text-white" />
+                      </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                          <h2 className="text-lg font-bold text-slate-900 dark:text-white">Sensei</h2>
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-gradient-to-r from-blue-500 to-cyan-500 text-white uppercase tracking-wider">Beta</span>
+                      </div>
+                      {aiResponse ? (
+                          <p className="text-sm text-slate-800 dark:text-slate-200 leading-relaxed mb-4 bg-white/50 dark:bg-black/20 p-3 rounded-lg border border-primary/10 animate-fade-in">{aiResponse}</p>
+                      ) : (
+                          <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                              Your personal manga guide. Ask me anything about your collection or new series.
+                          </p>
+                      )}
+
+                      <div className="flex gap-2">
+                          <div className="relative flex-1">
+                              <input
+                                  className="w-full bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-full py-2 px-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                  placeholder={loading ? "Thinking..." : "Ask Sensei..."}
+                                  type="text"
+                                  value={query}
+                                  onChange={(e) => setQuery(e.target.value)}
+                                  onKeyDown={(e) => e.key === 'Enter' && handleAskAI()}
+                                  disabled={loading}
+                              />
+                          </div>
+                          <button
+                              onClick={handleAskAI}
+                              disabled={loading || !query.trim()}
+                              className="bg-primary hover:bg-primary/90 text-white rounded-full p-2 flex items-center justify-center transition-colors shadow-lg shadow-primary/20 disabled:opacity-70"
+                          >
+                              <Icon name={loading ? "hourglass_empty" : "send"} className={`text-sm ${loading ? 'animate-spin' : ''}`} />
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+        </PremiumLock>
       </main>
     </div>
   );

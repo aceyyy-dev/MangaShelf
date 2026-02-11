@@ -4,6 +4,9 @@ import Avatar from '../components/Avatar';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../StoreContext';
 import ImageCropper from '../components/ImageCropper';
+import { formatSubscriptionExpiry, getSubscriptionDisplayName, getSubscriptionPrice } from '../utils/subscription';
+import { restorePurchases } from '../services/revenuecat';
+import { Capacitor } from '@capacitor/core';
 
 type ProfileView = 'favorites' | 'wishlist' | 'backup' | 'notifications' | 'export' | 'editProfile' | null;
 
@@ -39,6 +42,11 @@ const Profile: React.FC = () => {
   // Cropper State
   const [cropperImage, setCropperImage] = useState<string | null>(null);
 
+  // Subscription State
+  const [restoring, setRestoring] = useState(false);
+  const isPremium = userProfile.subscriptionStatus === 'premium';
+  const isNative = Capacitor.isNativePlatform();
+
   // Load current profile into edit form when view opens
   useEffect(() => {
       if (activeView === 'editProfile') {
@@ -66,6 +74,38 @@ const Profile: React.FC = () => {
           return;
       }
       navigate('/paywall');
+  };
+
+  const handleRestorePurchases = async () => {
+    setRestoring(true);
+    try {
+      const result = await restorePurchases();
+      if (result.success && result.isPremium) {
+        alert('Purchases restored successfully!');
+        window.location.reload();
+      } else {
+        alert('No active subscriptions found');
+      }
+    } catch (error) {
+      console.error('Restore failed:', error);
+      alert('Failed to restore purchases');
+    } finally {
+      setRestoring(false);
+    }
+  };
+
+  const handleManageSubscription = () => {
+    if (!isNative) {
+      alert('Subscription management is only available in the mobile app');
+      return;
+    }
+
+    const platform = Capacitor.getPlatform();
+    if (platform === 'ios') {
+      window.open('https://apps.apple.com/account/subscriptions', '_blank');
+    } else if (platform === 'android') {
+      window.open('https://play.google.com/store/account/subscriptions', '_blank');
+    }
   };
 
   const getDaysWaitAndDate = () => {
@@ -498,17 +538,66 @@ const Profile: React.FC = () => {
             </div>
         </header>
         
-        <section onClick={handleUpgradeClick} className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 to-black border border-slate-800 shadow-2xl group cursor-pointer">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl -mr-16 -mt-16 opacity-30"></div>
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-yellow-500/10 rounded-full blur-3xl -ml-12 -mb-12 opacity-30"></div>
-            <div className="relative p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="space-y-2 flex-1">
-                    <div className="flex items-center gap-2"><Icon name="workspace_premium" className="text-yellow-400 text-xl" type="outlined" /><h3 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-600">MangaShelf+</h3></div>
-                    <p className="text-sm text-slate-300 leading-relaxed">Unlock <span className="text-white font-medium">Cloud Sync</span> across devices and access <span className="text-white font-medium">Advanced Reading Stats</span>.</p>
-                </div>
-                <button className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-300 hover:to-yellow-500 text-slate-900 font-bold text-sm rounded-lg shadow-lg shadow-yellow-900/20 transition-all transform active:scale-95 flex items-center justify-center gap-2 whitespace-nowrap"><span>Upgrade Now</span><Icon name="arrow_forward" type="outlined" className="text-base" /></button>
-            </div>
-        </section>
+        {isPremium ? (
+          <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 to-black border border-slate-800 shadow-2xl">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl -mr-16 -mt-16 opacity-30"></div>
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-yellow-500/10 rounded-full blur-3xl -ml-12 -mb-12 opacity-30"></div>
+              <div className="relative p-5 space-y-4">
+                  <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                          <Icon name="workspace_premium" className="text-yellow-400 text-xl" type="outlined" />
+                          <h3 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-600">MangaShelf+</h3>
+                      </div>
+                      <span className="px-3 py-1 bg-green-500/20 text-green-400 text-xs font-bold rounded-full border border-green-500/30">
+                          ACTIVE
+                      </span>
+                  </div>
+                  <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                          <span className="text-slate-400">Plan</span>
+                          <span className="text-white font-medium">{getSubscriptionDisplayName(userProfile.subscriptionTier || null)}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                          <span className="text-slate-400">Price</span>
+                          <span className="text-white font-medium">{getSubscriptionPrice(userProfile.subscriptionTier || null)}</span>
+                      </div>
+                      {userProfile.subscriptionExpiresAt && (
+                        <div className="flex items-center justify-between text-sm">
+                            <span className="text-slate-400">Renews</span>
+                            <span className="text-white font-medium">{formatSubscriptionExpiry(userProfile.subscriptionExpiresAt)}</span>
+                        </div>
+                      )}
+                  </div>
+                  <div className="flex gap-2">
+                      <button
+                        onClick={handleManageSubscription}
+                        className="flex-1 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-medium text-sm rounded-lg transition-all"
+                      >
+                          Manage
+                      </button>
+                      <button
+                        onClick={handleRestorePurchases}
+                        disabled={restoring}
+                        className="flex-1 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-medium text-sm rounded-lg transition-all disabled:opacity-50"
+                      >
+                          {restoring ? 'Restoring...' : 'Restore'}
+                      </button>
+                  </div>
+              </div>
+          </section>
+        ) : (
+          <section onClick={handleUpgradeClick} className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 to-black border border-slate-800 shadow-2xl group cursor-pointer">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl -mr-16 -mt-16 opacity-30"></div>
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-yellow-500/10 rounded-full blur-3xl -ml-12 -mb-12 opacity-30"></div>
+              <div className="relative p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="space-y-2 flex-1">
+                      <div className="flex items-center gap-2"><Icon name="workspace_premium" className="text-yellow-400 text-xl" type="outlined" /><h3 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-600">MangaShelf+</h3></div>
+                      <p className="text-sm text-slate-300 leading-relaxed">Unlock <span className="text-white font-medium">Cloud Sync</span> across devices and access <span className="text-white font-medium">Advanced Reading Stats</span>.</p>
+                  </div>
+                  <button className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-300 hover:to-yellow-500 text-slate-900 font-bold text-sm rounded-lg shadow-lg shadow-yellow-900/20 transition-all transform active:scale-95 flex items-center justify-center gap-2 whitespace-nowrap"><span>Upgrade Now</span><Icon name="arrow_forward" type="outlined" className="text-base" /></button>
+              </div>
+          </section>
+        )}
 
         <section className="space-y-6">
             <div className="space-y-3">

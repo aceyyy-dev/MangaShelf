@@ -1,45 +1,118 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../components/Icon';
 import { useStore } from '../StoreContext';
 import { supabase } from '../supabase';
+import {
+  initializeRevenueCat,
+  getAvailablePackages,
+  purchasePackage,
+  PRODUCT_IDS
+} from '../services/revenuecat';
 
 const Paywall: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useStore();
+  const [loading, setLoading] = useState(false);
+  const [packages, setPackages] = useState<any[]>([]);
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly');
+  const [error, setError] = useState<string | null>(null);
 
-  const handleFinish = async () => {
+  useEffect(() => {
+    const setupRevenueCat = async () => {
       try {
-          console.log('Completing onboarding, fetching final profile...');
-
-          // Get the current user
-          const { data: { user } } = await supabase.auth.getUser();
-
-          if (user) {
-              // Fetch the complete profile from database
-              const { data: profile } = await supabase
-                  .from('profiles')
-                  .select('*')
-                  .eq('id', user.id)
-                  .maybeSingle();
-
-              if (profile) {
-                  console.log('Onboarding complete for user:', profile.username);
-                  login({
-                      name: profile.name,
-                      username: profile.username,
-                      avatarUrl: profile.avatar_url,
-                      joinDate: profile.join_date,
-                  });
-              }
-          }
-
-          navigate('/home');
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await initializeRevenueCat(user.id);
+          const availablePackages = await getAvailablePackages();
+          setPackages(availablePackages);
+        }
       } catch (error) {
-          console.error('Error completing onboarding:', error);
-          // Still navigate to home even if there's an error
-          navigate('/home');
+        console.error('Failed to setup RevenueCat:', error);
       }
+    };
+
+    setupRevenueCat();
+  }, []);
+
+  const handlePurchase = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('No user found');
+      }
+
+      const selectedPackage = packages.find((pkg: any) =>
+        pkg.product.identifier.includes(selectedPlan)
+      );
+
+      if (!selectedPackage) {
+        console.warn('No matching package found, proceeding without purchase');
+        await completeOnboarding();
+        return;
+      }
+
+      const result = await purchasePackage(selectedPackage);
+
+      if (result.success) {
+        await supabase
+          .from('profiles')
+          .update({
+            subscription_status: 'premium',
+            subscription_tier: selectedPlan,
+            revenuecat_customer_id: user.id
+          })
+          .eq('id', user.id);
+
+        await completeOnboarding();
+      } else if (result.cancelled) {
+        setLoading(false);
+      } else {
+        setError(result.error || 'Purchase failed');
+        setLoading(false);
+      }
+    } catch (error: any) {
+      console.error('Purchase error:', error);
+      setError(error.message || 'An error occurred');
+      setLoading(false);
+    }
+  };
+
+  const completeOnboarding = async () => {
+    try {
+      console.log('Completing onboarding, fetching final profile...');
+
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (profile) {
+          console.log('Onboarding complete for user:', profile.username);
+          login({
+            name: profile.name,
+            username: profile.username,
+            avatarUrl: profile.avatar_url,
+            joinDate: profile.join_date,
+            subscriptionStatus: profile.subscription_status,
+            subscriptionTier: profile.subscription_tier,
+            subscriptionExpiresAt: profile.subscription_expires_at,
+          });
+        }
+      }
+
+      navigate('/home');
+    } catch (error) {
+      console.error('Error completing onboarding:', error);
+      navigate('/home');
+    }
   };
 
   return (
@@ -100,7 +173,13 @@ const Paywall: React.FC = () => {
                 
                 <div className="space-y-2">
                     <label className="relative group cursor-pointer block">
-                        <input type="radio" name="plan" className="peer sr-only" defaultChecked />
+                        <input
+                          type="radio"
+                          name="plan"
+                          className="peer sr-only"
+                          checked={selectedPlan === 'yearly'}
+                          onChange={() => setSelectedPlan('yearly')}
+                        />
                         <div className="absolute -inset-0.5 bg-gradient-to-r from-gold/50 to-primary/50 rounded-xl opacity-75 blur transition duration-200 group-hover:opacity-100 peer-checked:opacity-100 animate-pulse"></div>
                         <div className="relative flex items-center justify-between p-3 rounded-xl bg-background-dark border-2 border-transparent peer-checked:border-gold/50 transition-all shadow-xl">
                             <div className="flex items-center gap-3">
@@ -121,9 +200,15 @@ const Paywall: React.FC = () => {
                             </div>
                         </div>
                     </label>
-                    
+
                     <label className="group cursor-pointer block">
-                        <input type="radio" name="plan" className="peer sr-only" />
+                        <input
+                          type="radio"
+                          name="plan"
+                          className="peer sr-only"
+                          checked={selectedPlan === 'monthly'}
+                          onChange={() => setSelectedPlan('monthly')}
+                        />
                         <div className="relative flex items-center justify-between p-3 rounded-xl bg-white/5 border-2 border-transparent hover:bg-white/10 peer-checked:bg-background-dark peer-checked:border-primary/50 transition-all">
                             <div className="flex items-center gap-3">
                                 <div className="w-4 h-4 rounded-full border-2 border-slate-600 peer-checked:border-primary peer-checked:bg-primary flex items-center justify-center transition-colors">
@@ -143,15 +228,25 @@ const Paywall: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                    <button 
-                        onClick={handleFinish}
-                        className="w-full py-3.5 px-6 bg-primary hover:bg-primary/90 active:bg-primary/80 text-white font-bold text-base rounded-xl shadow-lg shadow-primary/25 transition-all transform active:scale-[0.98] flex items-center justify-center gap-2 group"
+                    {error && (
+                      <div className="text-center text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-lg p-2">
+                        {error}
+                      </div>
+                    )}
+                    <button
+                        onClick={handlePurchase}
+                        disabled={loading}
+                        className="w-full py-3.5 px-6 bg-primary hover:bg-primary/90 active:bg-primary/80 text-white font-bold text-base rounded-xl shadow-lg shadow-primary/25 transition-all transform active:scale-[0.98] flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Start MangaShelf+
-                        <Icon name="arrow_forward" className="text-lg group-hover:translate-x-1 transition-transform" />
+                        {loading ? 'Processing...' : 'Start MangaShelf+'}
+                        {!loading && <Icon name="arrow_forward" className="text-lg group-hover:translate-x-1 transition-transform" />}
                     </button>
                     <div className="text-center">
-                        <button onClick={handleFinish} className="w-full py-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg text-sm font-bold transition-all active:scale-95">
+                        <button
+                          onClick={completeOnboarding}
+                          disabled={loading}
+                          className="w-full py-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg text-sm font-bold transition-all active:scale-95 disabled:opacity-50"
+                        >
                             Continue with Limited Version
                         </button>
                         <div className="flex justify-center items-center gap-4 text-[10px] text-slate-600 uppercase tracking-wider font-semibold mt-1">
