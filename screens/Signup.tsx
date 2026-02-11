@@ -31,15 +31,25 @@ const Signup: React.FC = () => {
       setLoading(true);
 
       try {
-          const { error } = await supabase.auth.signInWithOAuth({
+          console.log('Initiating Google OAuth signup...');
+          console.log('Redirect URL:', `${window.location.origin}/auth/callback`);
+
+          const { data, error } = await supabase.auth.signInWithOAuth({
               provider: 'google',
               options: {
                   redirectTo: `${window.location.origin}/auth/callback`,
+                  skipBrowserRedirect: false,
               },
           });
 
-          if (error) throw error;
+          if (error) {
+              console.error('OAuth error:', error);
+              throw error;
+          }
+
+          console.log('OAuth initiated successfully:', data);
       } catch (err: any) {
+          console.error('Google signup error:', err);
           setError(err.message || 'Failed to sign up with Google');
           setLoading(false);
       }

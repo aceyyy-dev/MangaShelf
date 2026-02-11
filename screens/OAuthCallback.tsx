@@ -11,64 +11,139 @@ const OAuthCallback: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    const handleOAuthCallback = async () => {
+    let mounted = true;
+    let timeoutId: NodeJS.Timeout;
+    let authListener: { data: { subscription: any } } | null = null;
+
+    const processSession = async (session: any) => {
+      if (!mounted || !session?.user) return;
+
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        console.log('Processing session for user:', session.user.id);
 
-        if (error) throw error;
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .maybeSingle();
 
-        if (session?.user) {
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .maybeSingle();
+        if (profileError && profileError.code !== 'PGRST116') {
+          throw profileError;
+        }
 
-          if (profileError && profileError.code !== 'PGRST116') {
-            throw profileError;
-          }
+        if (!mounted) return;
 
-          if (profile) {
-            login({
-              name: profile.name,
-              username: profile.username,
-              avatarUrl: profile.avatar_url,
-              joinDate: profile.join_date,
-            });
+        if (profile) {
+          console.log('Found existing profile:', profile.username);
+          login({
+            name: profile.name,
+            username: profile.username,
+            avatarUrl: profile.avatar_url,
+            joinDate: profile.join_date,
+          });
 
-            setStatus('success');
-            setTimeout(() => {
-              navigate('/home');
-            }, 1000);
-          } else {
-            const name = session.user.user_metadata?.full_name ||
-                        session.user.user_metadata?.name ||
-                        session.user.email?.split('@')[0] ||
-                        'User';
-
-            setTempUserData({ name });
-            setStatus('success');
-
-            setTimeout(() => {
-              navigate('/username-setup');
-            }, 1000);
-          }
+          setStatus('success');
+          setTimeout(() => {
+            if (mounted) navigate('/home');
+          }, 1000);
         } else {
-          throw new Error('No authentication session found');
+          console.log('No profile found, creating new user flow');
+          const name = session.user.user_metadata?.full_name ||
+                      session.user.user_metadata?.name ||
+                      session.user.email?.split('@')[0] ||
+                      'User';
+
+          setTempUserData({ name });
+          setStatus('success');
+
+          setTimeout(() => {
+            if (mounted) navigate('/username-setup');
+          }, 1000);
         }
       } catch (err: any) {
-        console.error('OAuth callback error:', err);
-        setStatus('error');
-        setErrorMessage(err.message || 'Failed to complete authentication');
+        console.error('Error processing session:', err);
+        if (mounted) {
+          setStatus('error');
+          setErrorMessage(err.message || 'Failed to process authentication');
+        }
       }
     };
 
-    const timer = setTimeout(() => {
+    const handleOAuthCallback = async () => {
+      try {
+        console.log('Starting OAuth callback handler');
+        console.log('Current URL:', window.location.href);
+
+        // Check if there are OAuth tokens in the URL
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const hasAccessToken = hashParams.has('access_token');
+        const errorParam = hashParams.get('error');
+        const errorDescription = hashParams.get('error_description');
+
+        if (errorParam) {
+          throw new Error(errorDescription || errorParam);
+        }
+
+        console.log('Has access token in URL:', hasAccessToken);
+
+        // Set up auth state change listener
+        authListener = supabase.auth.onAuthStateChange(async (event, session) => {
+          console.log('Auth state changed:', event, session ? 'Session exists' : 'No session');
+
+          if (event === 'SIGNED_IN' && session) {
+            await processSession(session);
+          } else if (event === 'TOKEN_REFRESHED' && session) {
+            await processSession(session);
+          }
+        });
+
+        // Also try to get existing session immediately
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+        if (sessionError) {
+          console.error('Session error:', sessionError);
+          throw sessionError;
+        }
+
+        if (session) {
+          console.log('Session found immediately');
+          await processSession(session);
+        } else {
+          console.log('No immediate session, waiting for auth state change...');
+        }
+
+        // Set a timeout in case nothing happens
+        timeoutId = setTimeout(() => {
+          if (mounted && status === 'loading') {
+            console.error('Timeout: No session received after 10 seconds');
+            setStatus('error');
+            setErrorMessage('Authentication timed out. Please try again.');
+          }
+        }, 10000);
+
+      } catch (err: any) {
+        console.error('OAuth callback error:', err);
+        if (mounted) {
+          setStatus('error');
+          setErrorMessage(err.message || 'Failed to complete authentication');
+        }
+      }
+    };
+
+    // Small delay to ensure URL is fully loaded
+    const initTimer = setTimeout(() => {
       handleOAuthCallback();
     }, 100);
 
-    return () => clearTimeout(timer);
-  }, [navigate, login, setTempUserData]);
+    return () => {
+      mounted = false;
+      clearTimeout(initTimer);
+      if (timeoutId) clearTimeout(timeoutId);
+      if (authListener?.data?.subscription) {
+        authListener.data.subscription.unsubscribe();
+      }
+    };
+  }, [navigate, login, setTempUserData, status]);
 
   return (
     <div className="h-full w-full flex flex-col items-center justify-center bg-background-dark px-6">
